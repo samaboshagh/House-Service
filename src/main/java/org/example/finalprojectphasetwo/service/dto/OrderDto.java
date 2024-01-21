@@ -1,0 +1,35 @@
+package org.example.finalprojectphasetwo.service.dto;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+import org.example.finalprojectphasetwo.entity.Suggestion;
+import org.example.finalprojectphasetwo.entity.enumeration.OrderStatus;
+import org.example.finalprojectphasetwo.entity.services.SubService;
+import org.example.finalprojectphasetwo.entity.users.Customer;
+
+import java.time.LocalDate;
+@NoArgsConstructor
+@AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@ToString
+@Getter
+@Setter
+public class OrderDto {
+
+    String description;
+
+    Double suggestedPrice;
+
+    LocalDate timeOfOrder;
+
+    String address;
+
+    Customer customer;
+
+    SubService subService;
+
+    OrderStatus status;
+
+    Suggestion suggestion;
+
+}
