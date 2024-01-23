@@ -1,4 +1,4 @@
-package org.example.finalprojectphasetwo.service.dto;
+package org.example.finalprojectphasetwo.dto;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,7 +8,6 @@ import org.example.finalprojectphasetwo.entity.Wallet;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
-@Setter
 public class UserSingUpDto {
 
     String firstName;

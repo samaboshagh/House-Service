@@ -1,4 +1,4 @@
-package org.example.finalprojectphasetwo.service.dto;
+package org.example.finalprojectphasetwo.dto;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -13,7 +13,6 @@ import java.time.LocalDate;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @ToString
 @Getter
-@Setter
 public class OrderDto {
 
     String description;

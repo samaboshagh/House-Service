@@ -14,43 +14,42 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-@MappedSuperclass
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@Table(name = "users_table")
+@Entity
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 
-    @Column(name = "first_name")
     @Pattern(regexp = "^[A-Za-z]+$")
     String firstName;
 
-    @Column(name = "last_name")
     @Pattern(regexp = "^[A-Za-z]+$")
     String lastName;
 
-    @Column(name = "email_address", unique = true)
+    @Column(unique = true)
     @Email
     String emailAddress;
 
+//    @Column(unique = true , nullable = false)
     String username;
 
     @Column(nullable = false)
     @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8}$")
     String password;
 
-    @Column(name = "is_active", columnDefinition = "boolean default false")
+    @Column(columnDefinition = "boolean default false")
     boolean isActive;
 
-    @Column(name = "has_permission", columnDefinition = "boolean default false")
+    @Column(columnDefinition = "boolean default false")
     boolean hasPermission;
 
-
-    @Column(name = "creation_date")
     LocalDate creationDate = LocalDate.now();
 
     @Override

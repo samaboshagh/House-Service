@@ -8,6 +8,7 @@ import org.springframework.data.repository.NoRepositoryBean;
 public interface UserRepository<T extends User> extends JpaRepository<T, Integer> {
 
     T findByUsername(String userName);
-    Boolean existsByUsernameAndPassword(String username, String password);
+
+    Boolean existsByUsername(String username);
 
 }

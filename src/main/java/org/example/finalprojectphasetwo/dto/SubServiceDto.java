@@ -1,4 +1,4 @@
-package org.example.finalprojectphasetwo.service.dto;
+package org.example.finalprojectphasetwo.dto;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;

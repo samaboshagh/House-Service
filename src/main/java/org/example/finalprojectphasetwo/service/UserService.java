@@ -6,7 +6,7 @@ public interface UserService<T extends User> {
 
     T findByUsername(String username);
 
-    boolean existsByUsernameAndPassword(String username, String password);
+    boolean existsByUsername(String username);
 
 
     void changePassword(T user, String password);

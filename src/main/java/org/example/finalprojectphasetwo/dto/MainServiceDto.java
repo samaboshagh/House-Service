@@ -1,4 +1,4 @@
-package org.example.finalprojectphasetwo.service.dto;
+package org.example.finalprojectphasetwo.dto;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,7 +8,6 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @ToString
 @Getter
-@Setter
 public class MainServiceDto {
 
     String title;

@@ -13,6 +13,7 @@ import jakarta.persistence.OneToOne;
 
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -26,7 +27,7 @@ public class Comment {
 
     @Max(10)
     @Max(0)
-    Double score = 0.0;
+    Integer score = 0;
 
     String comment;
 

@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.example.finalprojectphasetwo.entity.users.User;
 import org.example.finalprojectphasetwo.repository.UserRepository;
 import org.example.finalprojectphasetwo.service.UserService;
-import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
 public class UserServiceImpl<T extends User>
@@ -18,8 +17,8 @@ public class UserServiceImpl<T extends User>
     }
 
     @Override
-    public boolean existsByUsernameAndPassword(String username, String password) {
-        return repository.existsByUsernameAndPassword(username, password);
+    public boolean existsByUsername(String username) {
+        return repository.existsByUsername(username);
     }
 
     @Override

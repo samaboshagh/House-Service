@@ -13,6 +13,7 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -28,7 +29,6 @@ public class Order {
 
     Double suggestedPrice;
 
-    @Column(name = "time_of_order")
     @Future
     LocalDate timeOfOrder;
 

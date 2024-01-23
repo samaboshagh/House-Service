@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.example.finalprojectphasetwo.entity.services.SubService;
 import org.example.finalprojectphasetwo.repository.SubServiceRepository;
 import org.example.finalprojectphasetwo.service.SubServiceService;
-import org.example.finalprojectphasetwo.service.dto.SubServiceDto;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -17,21 +16,13 @@ public class SubServiceServiceImpl implements SubServiceService {
    private final SubServiceRepository repository;
 
     @Override
-    public void addSubServiceByAdmin(SubServiceDto dto) {
+    public SubService save(SubService subService) {
+        return repository.save(subService);
+    }
 
-        SubService subService = new SubService();
-        Collection<SubService> subServices = repository.findAll();
-        for (SubService sService : subServices) {
-            if (sService.getSubServiceTitle().equals(dto.getSubServiceTitle())) {
-                throw new IllegalStateException();
-            }
-        }
-        subService.setSubServiceTitle(dto.getSubServiceTitle());
-        subService.setBasePrice(dto.getBasePrice());
-        subService.setDescription(dto.getDescription());
-        subService.setMainService(dto.getMainService());
-        repository.save(subService);
-
+    @Override
+    public List<SubService> findAll() {
+        return repository.findAll();
     }
 
     @Override

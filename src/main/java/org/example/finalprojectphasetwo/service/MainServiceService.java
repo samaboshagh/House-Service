@@ -1,8 +1,8 @@
 package org.example.finalprojectphasetwo.service;
 
-import org.example.finalprojectphasetwo.service.dto.MainServiceDto;
+import org.example.finalprojectphasetwo.entity.services.MainService;
+
 
 public interface MainServiceService {
-
-    void saveServiceByAdmin(MainServiceDto mainServiceDto);
+    MainService save(MainService mainService);
 }

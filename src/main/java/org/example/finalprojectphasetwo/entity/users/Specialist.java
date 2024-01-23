@@ -19,15 +19,13 @@ import org.example.finalprojectphasetwo.entity.enumeration.SpecialistStatus;
 public class Specialist extends User {
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "specialist_status")
     SpecialistStatus specialistStatus;
 
     @Min(0)
     @Max(5)
-    Double star = 0.0;
+    Integer star = 0;
 
     @Lob
-    @Column(name = "profile_image")
     byte[] profileImage;
 
     @OneToOne
