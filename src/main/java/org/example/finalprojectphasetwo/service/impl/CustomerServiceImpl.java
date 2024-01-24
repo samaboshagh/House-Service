@@ -8,7 +8,6 @@ import org.example.finalprojectphasetwo.repository.UserRepository;
 import org.example.finalprojectphasetwo.service.CustomerService;
 import org.example.finalprojectphasetwo.dto.UserSingUpDto;
 import org.example.finalprojectphasetwo.service.OrderService;
-import org.example.finalprojectphasetwo.service.SuggestionService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,13 +17,10 @@ public class CustomerServiceImpl
         extends UserServiceImpl<Customer>
         implements CustomerService {
     private final OrderService orderService;
-    private final SuggestionService suggestionService;
 
-    public CustomerServiceImpl(UserRepository<Customer> repository, OrderService orderService, SuggestionService suggestionService) {
+    public CustomerServiceImpl(UserRepository<Customer> repository, OrderService orderService) {
         super(repository);
-
         this.orderService = orderService;
-        this.suggestionService = suggestionService;
     }
 
     @Override
@@ -52,9 +48,7 @@ public class CustomerServiceImpl
     }
 
     @Override
-    public void chooseSuggestionByCustomer(Integer orderId, Integer suggestionId) {
-        Suggestion suggestion = suggestionService.findById(suggestionId).orElse(null);
-        Order order = orderService.findById(orderId).orElse(null);
+    public void chooseSuggestionByCustomer(Order order, Suggestion suggestion) {
         if (suggestion != null && order != null) {
             order.setSuggestion(suggestion);
             order.setStatus(OrderStatus.WAITING_FOR_THE_SPECIALIST_TO_COME_TO_YOUR_PLACE);
@@ -63,8 +57,7 @@ public class CustomerServiceImpl
     }
 
     @Override
-    public void changeOrderStatusToStarted(Integer orderId) {
-        Order order = orderService.findById(orderId).orElse(null);
+    public void changeOrderStatusToStarted(Order order) {
         if (order != null) {
             order.setStatus(OrderStatus.STARTED);
             orderService.save(order);
@@ -72,8 +65,7 @@ public class CustomerServiceImpl
     }
 
     @Override
-    public void changeOrderStatusToDone(Integer orderId) {
-        Order order = orderService.findById(orderId).orElse(null);
+    public void changeOrderStatusToDone(Order order) {
         if (order != null) {
             order.setStatus(OrderStatus.DONE);
             orderService.save(order);

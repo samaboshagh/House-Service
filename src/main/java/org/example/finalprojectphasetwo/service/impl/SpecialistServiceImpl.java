@@ -1,5 +1,6 @@
 package org.example.finalprojectphasetwo.service.impl;
 
+import org.apache.coyote.BadRequestException;
 import org.example.finalprojectphasetwo.entity.Order;
 import org.example.finalprojectphasetwo.entity.Suggestion;
 import org.example.finalprojectphasetwo.entity.Wallet;
@@ -81,16 +82,17 @@ public class SpecialistServiceImpl
     public String getSpecialistProfileImageFromDatabase(Specialist specialist) throws IOException {
         if (specialist != null && specialist.getProfileImage() != null) {
             String filePath = "/Users/sama/IdeaProjects/FinalProjectPhaseOne/src/main/resources/image.jpg";
-            FileOutputStream fileOutputStream = new FileOutputStream(filePath);
-            fileOutputStream.write(specialist.getProfileImage());
+            try (FileOutputStream fileOutputStream = new FileOutputStream(filePath)) {
+                fileOutputStream.write(specialist.getProfileImage());
+            }
             return filePath;
         }
         return null;
     }
 
     @Override
-    public void addSuggestionToOrderBySpecialist(Integer orderID, CreateSuggestionDto dto) {
-        if (dto.getSuggestedStartDate().isBefore(LocalDate.now())) throw new IllegalStateException();
+    public void addSuggestionToOrderBySpecialist(Integer orderID, CreateSuggestionDto dto) throws BadRequestException {
+        if (dto.getSuggestedStartDate().isBefore(LocalDate.now())) throw new BadRequestException("NOT RIGHT TIME !");
         Order order = orderService.findById(orderID).orElse(null);
         Suggestion suggestion = Suggestion.builder()
                 .suggestedPrice(dto.getSuggestedPrice())
@@ -100,7 +102,7 @@ public class SpecialistServiceImpl
                 .build();
         assert order != null;
         if (order.getSubService() != null) {
-            if (dto.getSuggestedPrice() < order.getSubService().getBasePrice()) throw new IllegalStateException();
+            if (dto.getSuggestedPrice() < order.getSubService().getBasePrice()) throw new BadRequestException("SUGGESTED PRICE IS LESS THAN BASE PRICE");
             suggestionService.save(suggestion);
             order.setSuggestion(suggestion);
             order.setStatus(OrderStatus.WAITING_SPECIALIST_SELECTION);

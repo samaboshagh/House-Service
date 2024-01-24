@@ -12,4 +12,7 @@ public interface SubServiceService {
 
     List<SubService> loadSubServiceWithNoSepcialist();
 
+//  parameter might change
+    void editDescriptionAndPrice(Integer subService, String description , Double price);
+
 }

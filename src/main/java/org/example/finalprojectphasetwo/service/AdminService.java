@@ -2,6 +2,7 @@ package org.example.finalprojectphasetwo.service;
 
 
 
+import org.apache.coyote.BadRequestException;
 import org.example.finalprojectphasetwo.entity.services.SubService;
 import org.example.finalprojectphasetwo.entity.users.Admin;
 import org.example.finalprojectphasetwo.entity.users.Specialist;
@@ -16,9 +17,9 @@ public interface AdminService extends UserService<Admin>{
 
     void saveServiceByAdmin(MainServiceDto mainServiceDto);
 
-    void addSubServiceByAdmin(SubServiceDto subServiceDto);
+    void addSubServiceByAdmin(SubServiceDto subServiceDto) throws BadRequestException;
 
-    void addSpecialistToSubServiceByAdmin(Specialist specialist, SubService subService);
+    void addSpecialistToSubServiceByAdmin(Specialist specialist, SubService subService) throws BadRequestException;
 
     void deleteSpecialistFromSubServiceByAdmin(Set<Specialist> specialists, Specialist specialist, SubService subService);
 

@@ -1,6 +1,7 @@
 package org.example.finalprojectphasetwo.service.impl;
 
 import jakarta.annotation.PostConstruct;
+import org.apache.coyote.BadRequestException;
 import org.example.finalprojectphasetwo.entity.enumeration.SpecialistStatus;
 import org.example.finalprojectphasetwo.entity.services.MainService;
 import org.example.finalprojectphasetwo.entity.services.SubService;
@@ -52,22 +53,25 @@ public class AdminServiceImpl
     @Override
     public void saveServiceByAdmin(MainServiceDto dto) {
 
-        MainService mainService = new MainService();
-        mainService.setTitle(dto.getTitle());
+        MainService mainService = MainService
+                .builder()
+                .title(dto.getTitle())
+                .build();
         mainServiceService.save(mainService);
 
     }
 
     @Override
-    public void addSubServiceByAdmin(SubServiceDto dto) {
+    public void addSubServiceByAdmin(SubServiceDto dto) throws BadRequestException {
 
         Collection<SubService> subServices = subServiceService.findAll();
         for (SubService sService : subServices) {
             if (sService.getSubServiceTitle().equals(dto.getSubServiceTitle())) {
-                throw new IllegalStateException();
+                throw new BadRequestException("THIS SUB SERVICE ALREADY exists");
             }
         }
-        SubService subService = SubService.builder()
+        SubService subService = SubService
+                .builder()
                 .subServiceTitle(dto.getSubServiceTitle())
                 .basePrice(dto.getBasePrice())
                 .description(dto.getDescription())
@@ -76,14 +80,14 @@ public class AdminServiceImpl
         subServiceService.save(subService);
     }
 
-    public void addSpecialistToSubServiceByAdmin(Specialist specialist, SubService subService) {
+    public void addSpecialistToSubServiceByAdmin(Specialist specialist, SubService subService) throws BadRequestException {
         Set<Specialist> specialists = subService.getSpecialists();
         if (specialist.getSpecialistStatus().equals(SpecialistStatus.ACCEPTED)) {
             specialists.add(specialist);
             subService.setSpecialists(specialists);
             subServiceService.save(subService);
         } else {
-            throw new IllegalStateException();
+            throw new BadRequestException("SPECIALIST IS NOT ACCEPTED !");
         }
     }
 

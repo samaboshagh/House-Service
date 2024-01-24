@@ -32,4 +32,15 @@ public class SubServiceServiceImpl implements SubServiceService {
                 .filter(subService -> subService.getSpecialists() == null)
                 .toList();
     }
+
+    @Override
+    public void editDescriptionAndPrice(Integer subServiceId, String description, Double price) {
+        SubService subService = repository.findById(subServiceId).orElse(null);
+        if (subService == null) throw new NullPointerException();
+        subService.setDescription(description);
+        subService.setBasePrice(price);
+        repository.save(subService);
+    }
+
+
 }
