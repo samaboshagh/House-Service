@@ -15,7 +15,6 @@ import org.example.finalprojectphasetwo.service.SuggestionService;
 import org.example.finalprojectphasetwo.service.WalletService;
 import org.example.finalprojectphasetwo.dto.createSuggestionDto;
 import org.example.finalprojectphasetwo.dto.SpecialistSingUpDto;
-import org.springframework.jmx.access.InvocationFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
