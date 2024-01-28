@@ -77,7 +77,7 @@ public class SpecialistServiceImpl
         repository.save(specialist);
     }
 
-    private byte[] setProfileImageToSpecialist(String pathName) throws IOException {
+    public byte[] setProfileImageToSpecialist(String pathName) throws IOException {
         byte[] loadImage;
         Path path = Paths.get(pathName);
         loadImage = Files.readAllBytes(path);
@@ -87,7 +87,7 @@ public class SpecialistServiceImpl
     @Override
     public String getSpecialistProfileImageFromDatabase(Specialist specialist) throws IOException {
         if (specialist != null && specialist.getProfileImage() != null) {
-            String filePath = "/Users/sama/IdeaProjects/FinalProjectPhaseOne/src/main/resources/image.jpg";
+            String filePath = "/Users/sama/IdeaProjects/FinalProjectPhaseTwo/src/main/resources/image.jpg";
             try (FileOutputStream fileOutputStream = new FileOutputStream(filePath)) {
                 fileOutputStream.write(specialist.getProfileImage());
             }

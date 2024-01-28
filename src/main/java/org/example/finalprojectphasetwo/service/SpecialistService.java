@@ -21,6 +21,8 @@ public interface SpecialistService {
 
     void specialistSingUp(SpecialistSingUpDto dto) throws IOException;
 
+    byte[] setProfileImageToSpecialist(String pathName) throws IOException;
+
     String getSpecialistProfileImageFromDatabase(Specialist specialist) throws IOException;
 
     void addSuggestionToOrderBySpecialist(Order order, createSuggestionDto dto) throws BadRequestException;
