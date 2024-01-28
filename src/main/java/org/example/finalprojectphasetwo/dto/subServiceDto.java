@@ -7,9 +7,10 @@ import org.example.finalprojectphasetwo.entity.services.MainService;
 @Getter
 @Setter
 @AllArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
-public class SubServiceDto {
+public class subServiceDto {
 
     String subServiceTitle;
 

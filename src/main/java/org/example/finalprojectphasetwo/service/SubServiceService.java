@@ -10,7 +10,7 @@ public interface SubServiceService {
 
     List<SubService> findAll();
 
-    List<SubService> loadSubServiceWithNoSepcialist();
+    List<SubService> loadSubServiceWithNoSpcialist();
 
 //  parameter might change
     void editDescriptionAndPrice(Integer subService, String description , Double price);

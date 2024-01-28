@@ -8,9 +8,10 @@ import java.time.LocalDate;
 
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
-public class CreateSuggestionDto {
+public class createSuggestionDto {
 
     Double suggestedPrice;
 

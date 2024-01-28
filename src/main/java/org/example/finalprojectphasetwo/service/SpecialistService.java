@@ -2,9 +2,10 @@ package org.example.finalprojectphasetwo.service;
 
 
 import org.apache.coyote.BadRequestException;
+import org.example.finalprojectphasetwo.entity.Order;
 import org.example.finalprojectphasetwo.entity.enumeration.SpecialistStatus;
 import org.example.finalprojectphasetwo.entity.users.Specialist;
-import org.example.finalprojectphasetwo.dto.CreateSuggestionDto;
+import org.example.finalprojectphasetwo.dto.createSuggestionDto;
 import org.example.finalprojectphasetwo.dto.SpecialistSingUpDto;
 
 
@@ -22,6 +23,6 @@ public interface SpecialistService {
 
     String getSpecialistProfileImageFromDatabase(Specialist specialist) throws IOException;
 
-    void addSuggestionToOrderBySpecialist(Integer orderID, CreateSuggestionDto dto) throws BadRequestException;
+    void addSuggestionToOrderBySpecialist(Order order, createSuggestionDto dto) throws BadRequestException;
 
 }

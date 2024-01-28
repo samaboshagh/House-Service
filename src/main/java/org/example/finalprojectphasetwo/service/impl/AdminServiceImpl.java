@@ -13,12 +13,14 @@ import org.example.finalprojectphasetwo.service.MainServiceService;
 import org.example.finalprojectphasetwo.service.SpecialistService;
 import org.example.finalprojectphasetwo.service.SubServiceService;
 import org.example.finalprojectphasetwo.dto.MainServiceDto;
-import org.example.finalprojectphasetwo.dto.SubServiceDto;
+import org.example.finalprojectphasetwo.dto.subServiceDto;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.Set;
 
+@Transactional(readOnly = true)
 @Service
 public class AdminServiceImpl
         extends UserServiceImpl<Admin>
@@ -42,12 +44,14 @@ public class AdminServiceImpl
     @Override
     @PostConstruct
     public void init() {
-        Admin admin = new Admin();
-        admin.setUsername("admin");
-        admin.setPassword("admin123");
-        admin.setHasPermission(true);
-        admin.setActive(true);
-        repository.save(admin);
+        if (!repository.existsByUsername("admin")) {
+            Admin admin = new Admin();
+            admin.setUsername("admin");
+            admin.setPassword("admin123");
+            admin.setHasPermission(true);
+            admin.setActive(true);
+            repository.save(admin);
+        }
     }
 
     @Override
@@ -62,7 +66,7 @@ public class AdminServiceImpl
     }
 
     @Override
-    public void addSubServiceByAdmin(SubServiceDto dto) throws BadRequestException {
+    public void addSubServiceByAdmin(subServiceDto dto) throws BadRequestException {
 
         Collection<SubService> subServices = subServiceService.findAll();
         for (SubService sService : subServices) {
@@ -82,7 +86,7 @@ public class AdminServiceImpl
 
     public void addSpecialistToSubServiceByAdmin(Specialist specialist, SubService subService) throws BadRequestException {
         Set<Specialist> specialists = subService.getSpecialists();
-        if (specialist.getSpecialistStatus().equals(SpecialistStatus.ACCEPTED)) {
+        if (specialist.getSpecialistStatus().equals(SpecialistStatus.ACCEPTED) && !specialists.isEmpty()) {
             specialists.add(specialist);
             subService.setSpecialists(specialists);
             subServiceService.save(subService);
@@ -101,5 +105,9 @@ public class AdminServiceImpl
     public void setAcceptStatusForSpecialistByAdmin(Specialist specialist) {
         specialist.setSpecialistStatus(SpecialistStatus.ACCEPTED);
         specialistService.save(specialist);
+    }
+
+    public void deleteAll() {
+        repository.deleteAll();
     }
 }

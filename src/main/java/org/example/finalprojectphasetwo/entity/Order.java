@@ -10,6 +10,7 @@ import org.example.finalprojectphasetwo.entity.services.SubService;
 import org.example.finalprojectphasetwo.entity.users.Customer;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -43,7 +44,7 @@ public class Order {
     @Enumerated(EnumType.STRING)
     OrderStatus status;
 
-    @OneToOne
-    Suggestion suggestion;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.MERGE)
+    List<Suggestion> suggestions;
 
 }

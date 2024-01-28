@@ -15,10 +15,4 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     @Query("FROM Order o JOIN o.subService s JOIN s.specialists sp WHERE sp = :specialist")
     List<Order> findOrdersBySpecialist(Specialist specialist);
 
-    @Query("FROM Order o JOIN o.suggestion s WHERE o.customer = :customer ORDER BY s.suggestedPrice ASC")
-    List<Order> findOrdersByCustomerAndOrderBySuggestionPrice(Customer customer);
-
-    @Query("FROM Order o JOIN o.suggestion s WHERE o.customer = :customer ORDER BY s.specialist.star ASC")
-    List<Order> findOrdersByCustomerAndOrderBySpecialistScore(Customer customer);
-
 }

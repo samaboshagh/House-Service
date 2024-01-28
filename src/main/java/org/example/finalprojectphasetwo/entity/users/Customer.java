@@ -1,5 +1,6 @@
 package org.example.finalprojectphasetwo.entity.users;
 
+import jakarta.persistence.CascadeType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -20,10 +21,18 @@ import java.util.List;
 @Entity
 public class Customer extends User {
 
-    @OneToMany(mappedBy = "customer")
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.MERGE)
     List<Order> orders;
 
     @OneToOne
     Wallet wallet;
 
+    public Customer(String firstName, String lastName, String emailAddress, String username, String password) {
+        super(firstName, lastName, emailAddress, username, password);
+    }
+
+    public Customer(String firstName, String lastName, String emailAddress, String username, String password, List<Order> orders) {
+        super(firstName, lastName, emailAddress, username, password);
+        this.orders = orders;
+    }
 }

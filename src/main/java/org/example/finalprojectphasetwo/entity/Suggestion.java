@@ -31,7 +31,10 @@ public class Suggestion {
 
     String workDuration;
 
-    @OneToOne
+    @ManyToOne
     Specialist specialist;
+
+    @ManyToOne(cascade = CascadeType.MERGE)
+    Order order;
 
 }

@@ -9,7 +9,4 @@ public class FinalProjectPhaseTwoApplication {
     public static void main(String[] args) {
         SpringApplication.run(FinalProjectPhaseTwoApplication.class, args);
     }
-
-    
-
 }

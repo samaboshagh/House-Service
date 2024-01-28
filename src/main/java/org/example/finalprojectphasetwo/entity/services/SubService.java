@@ -24,10 +24,8 @@ public class SubService {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 
-    @Column(name = "sub_service_title")
     String subServiceTitle;
 
-    @Column(name = "base_price")
     Double basePrice;
 
     String description;
@@ -35,7 +33,7 @@ public class SubService {
     @ManyToOne
     MainService mainService;
 
-    @OneToMany(mappedBy = "subService", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "subService", cascade = CascadeType.MERGE)
     List<Order> order;
 
     @ManyToMany

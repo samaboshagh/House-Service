@@ -19,8 +19,4 @@ public interface OrderService {
 
     Order save(Order order);
 
-    List<Order> findOrdersByCustomerAndOrderBySuggestionPrice(Customer customer);
-
-    List<Order> findOrdersByCustomerAndOrderBySpecialistScore(Customer customer);
-
 }

@@ -13,9 +13,11 @@ import org.example.finalprojectphasetwo.service.OrderService;
 import org.example.finalprojectphasetwo.service.SpecialistService;
 import org.example.finalprojectphasetwo.service.SuggestionService;
 import org.example.finalprojectphasetwo.service.WalletService;
-import org.example.finalprojectphasetwo.dto.CreateSuggestionDto;
+import org.example.finalprojectphasetwo.dto.createSuggestionDto;
 import org.example.finalprojectphasetwo.dto.SpecialistSingUpDto;
+import org.springframework.jmx.access.InvocationFailureException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -23,8 +25,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
+@Transactional(readOnly = true)
 @Service
 public class SpecialistServiceImpl
         extends UserServiceImpl<Specialist>
@@ -43,6 +47,7 @@ public class SpecialistServiceImpl
         this.suggestionService = suggestionService;
     }
 
+    @Transactional
     @Override
     public Specialist save(Specialist specialist) {
         return repository.save(specialist);
@@ -53,6 +58,7 @@ public class SpecialistServiceImpl
         return repository.findSpecialistBySpecialistStatus(status);
     }
 
+    @Transactional
     @Override
     public void specialistSingUp(SpecialistSingUpDto dto) throws IOException {
         Specialist specialist = new Specialist();
@@ -90,23 +96,33 @@ public class SpecialistServiceImpl
         return null;
     }
 
+    @Transactional
     @Override
-    public void addSuggestionToOrderBySpecialist(Integer orderID, CreateSuggestionDto dto) throws BadRequestException {
-        if (dto.getSuggestedStartDate().isBefore(LocalDate.now())) throw new BadRequestException("NOT RIGHT TIME !");
-        Order order = orderService.findById(orderID).orElse(null);
+    public void addSuggestionToOrderBySpecialist(Order order, createSuggestionDto dto) throws BadRequestException {
+        addSuggestionToOrderBySpecialistValidation(order, dto);
         Suggestion suggestion = Suggestion.builder()
                 .suggestedPrice(dto.getSuggestedPrice())
                 .suggestedStartDate(dto.getSuggestedStartDate())
                 .workDuration(dto.getWorkDuration())
                 .specialist(dto.getSpecialist())
                 .build();
-        assert order != null;
-        if (order.getSubService() != null) {
-            if (dto.getSuggestedPrice() < order.getSubService().getBasePrice()) throw new BadRequestException("SUGGESTED PRICE IS LESS THAN BASE PRICE");
+        List<Suggestion> suggestions = new ArrayList<>();
+        suggestions.add(suggestion);
+        if (checkPrice(order, dto)) {
             suggestionService.save(suggestion);
-            order.setSuggestion(suggestion);
+            order.setSuggestions(suggestions);
             order.setStatus(OrderStatus.WAITING_SPECIALIST_SELECTION);
             orderService.save(order);
-        } else throw new NullPointerException();
+        } else throw new BadRequestException("SUGGESTED PRICE IS LESS THAN BASE PRICE");
+    }
+
+    private static void addSuggestionToOrderBySpecialistValidation(Order order, createSuggestionDto dto) throws BadRequestException {
+        if (dto.getSuggestedStartDate().isBefore(LocalDate.now())) throw new BadRequestException("NOT RIGHT TIME !");
+        if (order == null) throw new NullPointerException("BAD INVOCATION FOR ORDER !");
+    }
+
+    private boolean checkPrice(Order order, createSuggestionDto dto) {
+        if (order.getSubService().getBasePrice() == null) throw new NullPointerException("SUB SERVICE IS NULL !");
+        return dto.getSuggestedPrice() > order.getSubService().getBasePrice();
     }
 }

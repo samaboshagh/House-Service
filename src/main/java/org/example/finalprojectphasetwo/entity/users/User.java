@@ -14,7 +14,6 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -51,6 +50,14 @@ public class User {
     boolean hasPermission;
 
     LocalDate creationDate = LocalDate.now();
+
+    public User(String firstName, String lastName, String emailAddress, String username, String password) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.emailAddress = emailAddress;
+        this.username = username;
+        this.password = password;
+    }
 
     @Override
     public String toString() {
