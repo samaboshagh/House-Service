@@ -58,6 +58,7 @@ class AdminServiceImplTest {
         );
         Set<Specialist> specialists = new HashSet<>();
         specialists.add(specialist);
+        specialist.setActive(true);
         specialistService.save(specialist);
 
         SubService subService = SubService
@@ -86,6 +87,7 @@ class AdminServiceImplTest {
                 "s1234567",
                 SpecialistStatus.NEW
         );
+        specialist.setActive(true);
         specialistRepository.save(specialist);
         Set<Specialist> specialists = new HashSet<>();
         specialists.add(specialist);
@@ -99,7 +101,7 @@ class AdminServiceImplTest {
         // when and then
         assertThatThrownBy(() -> adminService.addSpecialistToSubServiceByAdmin(specialist, subService))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("SPECIALIST IS NOT ACCEPTED !");
+                .hasMessage("SPECIALIST IS NOT QUALIFIED !");
     }
 
     @Test

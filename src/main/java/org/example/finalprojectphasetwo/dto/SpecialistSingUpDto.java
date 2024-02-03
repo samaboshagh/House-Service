@@ -11,6 +11,9 @@ import lombok.experimental.FieldDefaults;
 @Getter
 public class SpecialistSingUpDto extends UserSingUpDto {
 
+    @NonNull
+    String specialization;
+
     byte[] profileImage;
 
     String pathName;

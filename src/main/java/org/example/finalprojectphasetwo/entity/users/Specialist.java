@@ -8,17 +8,17 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import jakarta.persistence.*;
+import lombok.experimental.SuperBuilder;
 import org.example.finalprojectphasetwo.entity.Suggestion;
 import org.example.finalprojectphasetwo.entity.Wallet;
 import org.example.finalprojectphasetwo.entity.enumeration.SpecialistStatus;
 
-import java.time.LocalDate;
 import java.util.List;
 
 
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -27,6 +27,8 @@ public class Specialist extends User {
 
     @Enumerated(EnumType.STRING)
     SpecialistStatus specialistStatus;
+
+    String specialization;
 
     @Min(0)
     @Max(5)

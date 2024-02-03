@@ -17,10 +17,6 @@ public class Wallet{
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id ;
 
-    Long totalAmount = 0L;
-
-    Long cashAmount = 0L;
-
-    Long creditAmount = 0L;
+    Double creditAmount = 0.0;
 
 }

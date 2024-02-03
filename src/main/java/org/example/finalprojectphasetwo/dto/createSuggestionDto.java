@@ -13,11 +13,14 @@ import java.time.LocalDate;
 @Getter
 public class createSuggestionDto {
 
+    @NonNull
     Double suggestedPrice;
 
+    @NonNull
     LocalDate suggestedStartDate;
 
-    String workDuration;
+    @NonNull
+    LocalDate workDuration;
 
     Specialist specialist;
 

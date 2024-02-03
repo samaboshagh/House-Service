@@ -1,12 +1,14 @@
 package org.example.finalprojectphasetwo.service.impl;
 
-import org.apache.coyote.BadRequestException;
 import org.example.finalprojectphasetwo.entity.Order;
 import org.example.finalprojectphasetwo.entity.Suggestion;
 import org.example.finalprojectphasetwo.entity.Wallet;
 import org.example.finalprojectphasetwo.entity.enumeration.OrderStatus;
 import org.example.finalprojectphasetwo.entity.enumeration.SpecialistStatus;
 import org.example.finalprojectphasetwo.entity.users.Specialist;
+import org.example.finalprojectphasetwo.exception.InvalidInputException;
+import org.example.finalprojectphasetwo.exception.NotFoundException;
+import org.example.finalprojectphasetwo.exception.WrongTimeException;
 import org.example.finalprojectphasetwo.repository.SpecialistRepository;
 import org.example.finalprojectphasetwo.repository.UserRepository;
 import org.example.finalprojectphasetwo.service.OrderService;
@@ -60,20 +62,26 @@ public class SpecialistServiceImpl
     @Transactional
     @Override
     public void specialistSingUp(SpecialistSingUpDto dto) throws IOException {
-        Specialist specialist = new Specialist();
-        specialist.setFirstName(dto.getFirstName());
-        specialist.setLastName(dto.getLastName());
-        specialist.setEmailAddress(dto.getEmailAddress());
-        specialist.setUsername(dto.getUsername());
-        specialist.setPassword(dto.getPassword());
-        specialist.setActive(true);
-        specialist.setHasPermission(false);
-        specialist.setSpecialistStatus(SpecialistStatus.NEW);
-        setProfileImageToSpecialist(dto.getPathName());
-        specialist.setProfileImage(setProfileImageToSpecialist(dto.getPathName()));
         Wallet wallet = walletService.saveWallet();
-        specialist.setWallet(wallet);
-        repository.save(specialist);
+        checkValidName(dto);
+        checkUsernameAndEmailForRegistration(dto);
+        checkPassword(dto);
+        repository.save(
+                Specialist
+                        .builder()
+                        .firstName(dto.getFirstName())
+                        .lastName(dto.getLastName())
+                        .emailAddress(dto.getEmailAddress())
+                        .username(dto.getUsername())
+                        .password(dto.getPassword())
+                        .isActive(true)
+                        .hasPermission(false)
+                        .specialistStatus(SpecialistStatus.NEW)
+                        .specialization(dto.getSpecialization())
+                        .profileImage(setProfileImageToSpecialist(dto.getPathName()))
+                        .wallet(wallet)
+                        .build()
+        );
     }
 
     public byte[] setProfileImageToSpecialist(String pathName) throws IOException {
@@ -97,7 +105,7 @@ public class SpecialistServiceImpl
 
     @Transactional
     @Override
-    public void addSuggestionToOrderBySpecialist(Order order, createSuggestionDto dto) throws BadRequestException {
+    public void addSuggestionToOrderBySpecialist(Order order, createSuggestionDto dto) {
         addSuggestionToOrderBySpecialistValidation(order, dto);
         Suggestion suggestion = Suggestion.builder()
                 .suggestedPrice(dto.getSuggestedPrice())
@@ -112,16 +120,44 @@ public class SpecialistServiceImpl
             order.setSuggestions(suggestions);
             order.setStatus(OrderStatus.WAITING_SPECIALIST_SELECTION);
             orderService.save(order);
-        } else throw new BadRequestException("SUGGESTED PRICE IS LESS THAN BASE PRICE");
+        } else throw new InvalidInputException("SUGGESTED PRICE IS LESS THAN BASE PRICE");
     }
 
-    private static void addSuggestionToOrderBySpecialistValidation(Order order, createSuggestionDto dto) throws BadRequestException {
-        if (dto.getSuggestedStartDate().isBefore(LocalDate.now())) throw new BadRequestException("NOT RIGHT TIME !");
-        if (order == null) throw new NullPointerException("BAD INVOCATION FOR ORDER !");
+    @Override
+    @Transactional
+    public void demotionOfTheSpecialist(Specialist specialist) {
+        if (repository.findByUsername(specialist.getUsername()) != null && specialist.getStar() < 0) {
+            specialist.setSpecialistStatus(SpecialistStatus.WARNING);
+            specialist.setActive(false);
+            repository.save(specialist);
+        } else throw new NotFoundException("SPECIALIST NOT FOUND");
+    }
+
+    @Override
+    @Transactional
+    public void reducingScore(Specialist specialist) {
+        if (repository.findByUsername(specialist.getUsername()) != null) {
+            specialist.setStar(specialist.getStar() - 1);
+            repository.save(specialist);
+        } else throw new NotFoundException("SPECIALIST NOT FOUND");
+    }
+
+    @Override
+    public void specialistGetPayment(Suggestion suggestion) {
+        if (suggestion != null && repository.findByUsername(suggestion.getSpecialist().getUsername()) != null) {
+            Wallet wallet = suggestion.getSpecialist().getWallet();
+            wallet.setCreditAmount(suggestion.getSuggestedPrice() * 0.7);
+            walletService.save(wallet);
+        } else throw new NotFoundException("SPECIALIST NOT FOUND");
+    }
+
+    private static void addSuggestionToOrderBySpecialistValidation(Order order, createSuggestionDto dto) {
+        if (dto.getSuggestedStartDate().isBefore(LocalDate.now())) throw new WrongTimeException("NOT RIGHT TIME !");
+        if (order == null) throw new NotFoundException("BAD INVOCATION FOR ORDER !");
     }
 
     private boolean checkPrice(Order order, createSuggestionDto dto) {
-        if (order.getSubService().getBasePrice() == null) throw new NullPointerException("SUB SERVICE IS NULL !");
+        if (order.getSubService().getBasePrice() == null) throw new NotFoundException("SUB SERVICE IS NULL !");
         return dto.getSuggestedPrice() > order.getSubService().getBasePrice();
     }
 }

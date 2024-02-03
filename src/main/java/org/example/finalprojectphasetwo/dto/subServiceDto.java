@@ -12,8 +12,10 @@ import org.example.finalprojectphasetwo.entity.services.MainService;
 @NoArgsConstructor
 public class subServiceDto {
 
+    @NonNull
     String subServiceTitle;
 
+    @NonNull
     Double basePrice;
 
     String description;

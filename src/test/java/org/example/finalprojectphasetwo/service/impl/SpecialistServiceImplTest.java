@@ -57,6 +57,8 @@ class SpecialistServiceImplTest {
     private createSuggestionDto createSuggestionDtoInitForRightTime() {
         return createSuggestionDto
                 .builder()
+                .suggestedPrice(12.12)
+                .workDuration(LocalDate.now())
                 .suggestedStartDate(LocalDate.now().minusDays(1))
                 .build();
     }
@@ -64,6 +66,7 @@ class SpecialistServiceImplTest {
     private createSuggestionDto createSuggestionDtoInit() {
         return createSuggestionDto
                 .builder()
+                .workDuration(LocalDate.now())
                 .suggestedStartDate(LocalDate.now().plusDays(1))
                 .suggestedPrice(100.0)
                 .build();
@@ -87,6 +90,7 @@ class SpecialistServiceImplTest {
         specialist.setEmailAddress("Specialist2@gmail.com");
         specialist.setUsername("Specialist");
         specialist.setPassword("Spe12345");
+        specialist.setActive(true);
         specialist.setSpecialistStatus(SpecialistStatus.ACCEPTED);
         specialist.setProfileImage(specialistService.setProfileImageToSpecialist(filePath));
         specialistService.save(specialist);
@@ -110,6 +114,7 @@ class SpecialistServiceImplTest {
         specialist.setLastName("SpecialistLastname");
         specialist.setEmailAddress("Specialistt@gmail.com");
         specialist.setUsername("Specialist");
+        specialist.setActive(true);
         specialist.setPassword("Spe12345");
         specialist.setSpecialistStatus(SpecialistStatus.ACCEPTED);
         specialist.setProfileImage(specialistService.setProfileImageToSpecialist(filePath));
@@ -151,7 +156,7 @@ class SpecialistServiceImplTest {
             Suggestion savedSuggestion = suggestionService.findById(order.getSuggestions().get(0).getId()).orElse(null);
             assertNotNull(savedSuggestion);
         } catch (BadRequestException | NullPointerException e) {
-            fail("Unexpected exception: " + e.getMessage());
+            fail("UNEXPECTED EXCEPTION: " + e.getMessage());
         }
     }
 

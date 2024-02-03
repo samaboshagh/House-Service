@@ -1,17 +1,23 @@
 package org.example.finalprojectphasetwo.dto;
 
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.example.finalprojectphasetwo.entity.Order;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@ToString
 @Getter
-public class MainServiceDto {
+public class AddCommentDto {
 
+    String comment;
+
+    @Size(max = 5)
     @NonNull
-    String title;
+    Integer score;
+
+    Order order;
 
 }

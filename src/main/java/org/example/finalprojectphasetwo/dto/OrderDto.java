@@ -18,8 +18,10 @@ public class OrderDto {
 
     String description;
 
+    @NonNull
     Double suggestedPrice;
 
+    @NonNull
     LocalDate timeOfOrder;
 
     String address;

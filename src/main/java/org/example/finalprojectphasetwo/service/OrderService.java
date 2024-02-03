@@ -1,7 +1,7 @@
 package org.example.finalprojectphasetwo.service;
 
 import org.example.finalprojectphasetwo.entity.Order;
-import org.example.finalprojectphasetwo.entity.users.Customer;
+import org.example.finalprojectphasetwo.entity.enumeration.OrderStatus;
 import org.example.finalprojectphasetwo.entity.users.Specialist;
 import org.example.finalprojectphasetwo.dto.OrderDto;
 
@@ -14,6 +14,8 @@ public interface OrderService {
     void addOrder(OrderDto orderDto);
 
     List<Order> findOrderWithWaitingStatusBySpecialist(Specialist specialist);
+
+    void changeOrderStatus(Order order, OrderStatus status);
 
     Optional<Order> findById(Integer orderId);
 

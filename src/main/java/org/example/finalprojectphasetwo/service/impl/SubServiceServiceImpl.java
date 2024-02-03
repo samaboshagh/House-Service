@@ -2,6 +2,7 @@ package org.example.finalprojectphasetwo.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.example.finalprojectphasetwo.entity.services.SubService;
+import org.example.finalprojectphasetwo.exception.NotFoundException;
 import org.example.finalprojectphasetwo.repository.SubServiceRepository;
 import org.example.finalprojectphasetwo.service.SubServiceService;
 import org.springframework.stereotype.Service;
@@ -40,7 +41,7 @@ public class SubServiceServiceImpl implements SubServiceService {
     @Override
     public void editDescriptionAndPrice(Integer subServiceId, String description, Double price) {
         SubService subService = repository.findById(subServiceId).orElse(null);
-        if (subService == null) throw new NullPointerException("SUB SERVICE NOT FOUND");
+        if (subService == null) throw new NotFoundException("SUB SERVICE NOT FOUND");
         subService.setDescription(description);
         subService.setBasePrice(price);
         repository.save(subService);

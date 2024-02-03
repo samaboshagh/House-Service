@@ -44,6 +44,9 @@ public class Order {
     @Enumerated(EnumType.STRING)
     OrderStatus status;
 
+    @Column(columnDefinition = "boolean default false")
+    boolean isPaid;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.MERGE)
     List<Suggestion> suggestions;
 

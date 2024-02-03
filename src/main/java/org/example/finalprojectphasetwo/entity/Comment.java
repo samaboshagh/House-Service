@@ -4,7 +4,6 @@ package org.example.finalprojectphasetwo.entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.validation.constraints.Max;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -23,13 +22,11 @@ public class Comment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Integer id;
-
-    @Max(10)
-    @Max(0)
-    Integer score = 0;
+    Integer id;
 
     String comment;
+
+    Integer score;
 
     @OneToOne
     Order order;

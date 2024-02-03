@@ -3,6 +3,9 @@ package org.example.finalprojectphasetwo.service.impl;
 import org.example.finalprojectphasetwo.entity.Order;
 import org.example.finalprojectphasetwo.entity.enumeration.OrderStatus;
 import org.example.finalprojectphasetwo.entity.users.Specialist;
+import org.example.finalprojectphasetwo.exception.InvalidInputException;
+import org.example.finalprojectphasetwo.exception.NotFoundException;
+import org.example.finalprojectphasetwo.exception.WrongTimeException;
 import org.example.finalprojectphasetwo.repository.OrderRepository;
 import org.example.finalprojectphasetwo.service.OrderService;
 import org.example.finalprojectphasetwo.dto.OrderDto;
@@ -26,7 +29,7 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     @Override
     public void addOrder(OrderDto orderDto) {
-        if (orderDto.getTimeOfOrder().isBefore(LocalDate.now())) throw new IllegalStateException("INVALID DATE !");
+        if (orderDto.getTimeOfOrder().isBefore(LocalDate.now())) throw new WrongTimeException("INVALID DATE !");
         Order order = Order.builder()
                 .description(orderDto.getDescription())
                 .suggestedPrice(orderDto.getSuggestedPrice())
@@ -38,17 +41,17 @@ public class OrderServiceImpl implements OrderService {
                 .build();
         if (checkPrice(order, orderDto) && checkValidCustomer(orderDto)) {
             repository.save(order);
-        } else throw new IllegalStateException("BASE PRICE IS MORE THAN SUGGESTED PRICE ! ");
+        } else throw new InvalidInputException("BASE PRICE IS MORE THAN SUGGESTED PRICE ! ");
     }
 
     private boolean checkPrice(Order order, OrderDto orderDto) {
-        if (order.getSubService().getBasePrice() == null) throw new NullPointerException("SUB SERVICE IS NULL !");
+        if (order.getSubService().getBasePrice() == null) throw new NotFoundException("SUB SERVICE IS NULL !");
         return order.getSubService().getBasePrice() < orderDto.getSuggestedPrice();
     }
 
     boolean checkValidCustomer(OrderDto orderDto) {
         if (orderDto.getCustomer() != null) return true;
-        else throw new IllegalStateException("CUSTOMER IS NULL !");
+        else throw new NotFoundException("CUSTOMER IS NULL !");
     }
 
 
@@ -63,8 +66,16 @@ public class OrderServiceImpl implements OrderService {
                                      order.getStatus()
                                              .equals(OrderStatus.WAITING_SPECIALIST_SELECTION))
                     .toList();
+        } else throw new NotFoundException("THIS SPECIALIST DOESN'T HAVE ANY ORDER ! ");
+    }
+
+    @Override
+    @Transactional
+    public void changeOrderStatus(Order order, OrderStatus status) {
+        if (order != null && status != null) {
+            order.setStatus(status);
+            repository.save(order);
         }
-        else throw new NullPointerException("THIS SPECIALIST DOESN'T HAVE ANY ORDER ! ");
     }
 
     @Override

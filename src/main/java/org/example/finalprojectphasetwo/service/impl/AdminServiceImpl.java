@@ -1,12 +1,13 @@
 package org.example.finalprojectphasetwo.service.impl;
 
 import jakarta.annotation.PostConstruct;
-import org.apache.coyote.BadRequestException;
 import org.example.finalprojectphasetwo.entity.enumeration.SpecialistStatus;
 import org.example.finalprojectphasetwo.entity.services.MainService;
 import org.example.finalprojectphasetwo.entity.services.SubService;
 import org.example.finalprojectphasetwo.entity.users.Admin;
 import org.example.finalprojectphasetwo.entity.users.Specialist;
+import org.example.finalprojectphasetwo.exception.DuplicateException;
+import org.example.finalprojectphasetwo.exception.SpecialistQualificationException;
 import org.example.finalprojectphasetwo.repository.*;
 import org.example.finalprojectphasetwo.service.AdminService;
 import org.example.finalprojectphasetwo.service.MainServiceService;
@@ -45,16 +46,20 @@ public class AdminServiceImpl
     @PostConstruct
     public void init() {
         if (!repository.existsByUsername("admin")) {
-            Admin admin = new Admin();
-            admin.setUsername("admin");
-            admin.setPassword("admin123");
-            admin.setHasPermission(true);
-            admin.setActive(true);
-            repository.save(admin);
+            repository.save(
+                    Admin
+                            .builder()
+                            .username("admin")
+                            .password("admin123")
+                            .hasPermission(true)
+                            .isActive(true)
+                            .build()
+            );
         }
     }
 
     @Override
+    @Transactional
     public void saveServiceByAdmin(MainServiceDto dto) {
 
         MainService mainService = MainService
@@ -66,12 +71,13 @@ public class AdminServiceImpl
     }
 
     @Override
-    public void addSubServiceByAdmin(subServiceDto dto) throws BadRequestException {
+    @Transactional
+    public void addSubServiceByAdmin(subServiceDto dto) {
 
         Collection<SubService> subServices = subServiceService.findAll();
         for (SubService sService : subServices) {
             if (sService.getSubServiceTitle().equals(dto.getSubServiceTitle())) {
-                throw new BadRequestException("THIS SUB SERVICE ALREADY exists");
+                throw new DuplicateException("THIS SUB SERVICE ALREADY EXISTS");
             }
         }
         SubService subService = SubService
@@ -84,17 +90,25 @@ public class AdminServiceImpl
         subServiceService.save(subService);
     }
 
-    public void addSpecialistToSubServiceByAdmin(Specialist specialist, SubService subService) throws BadRequestException {
+    @Override
+    @Transactional
+    public void addSpecialistToSubServiceByAdmin(Specialist specialist, SubService subService) {
         Set<Specialist> specialists = subService.getSpecialists();
-        if (specialist.getSpecialistStatus().equals(SpecialistStatus.ACCEPTED) && !specialists.isEmpty()) {
+        if (addSpecialistToSubServiceByAdminValidation(specialist, specialists)) {
             specialists.add(specialist);
             subService.setSpecialists(specialists);
             subServiceService.save(subService);
         } else {
-            throw new BadRequestException("SPECIALIST IS NOT ACCEPTED !");
+            throw new SpecialistQualificationException("SPECIALIST IS NOT QUALIFIED !");
         }
     }
 
+    private boolean addSpecialistToSubServiceByAdminValidation(Specialist specialist, Set<Specialist> specialists) {
+        return specialist.getSpecialistStatus().equals(SpecialistStatus.ACCEPTED) && !specialists.isEmpty() && specialist.isActive();
+    }
+
+    @Override
+    @Transactional
     public void deleteSpecialistFromSubServiceByAdmin(Set<Specialist> specialists, Specialist specialist, SubService subService) {
         specialists.remove(specialist);
         subService.setSpecialists(specialists);
@@ -102,6 +116,7 @@ public class AdminServiceImpl
     }
 
     @Override
+    @Transactional
     public void setAcceptStatusForSpecialistByAdmin(Specialist specialist) {
         specialist.setSpecialistStatus(SpecialistStatus.ACCEPTED);
         specialistService.save(specialist);

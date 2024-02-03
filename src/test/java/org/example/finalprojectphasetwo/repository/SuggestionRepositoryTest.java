@@ -58,6 +58,7 @@ class SuggestionRepositoryTest {
         specialist.setEmailAddress("Specialist@gmail.com");
         specialist.setUsername("SpecialistUsername");
         specialist.setPassword("s1234567");
+        specialist.setActive(true);
         specialist.setSpecialistStatus(SpecialistStatus.ACCEPTED);
         specialist.setStar(4);
         return specialistRepository.save(specialist);
@@ -126,5 +127,4 @@ class SuggestionRepositoryTest {
 //      then
         assertThat(expected).isFalse();
     }
-
 }

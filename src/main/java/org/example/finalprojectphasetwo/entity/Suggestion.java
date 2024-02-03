@@ -29,7 +29,7 @@ public class Suggestion {
     @Future
     LocalDate suggestedStartDate;
 
-    String workDuration;
+    LocalDate workDuration;
 
     @ManyToOne
     Specialist specialist;

@@ -119,6 +119,7 @@ class OrderServiceImplTest {
         // given
         OrderDto orderDto = OrderDto
                 .builder()
+                .suggestedPrice(12.12)
                 .subService(initializeService())
                 .timeOfOrder(LocalDate.now().minusDays(1))
                 .build();
@@ -160,13 +161,14 @@ class OrderServiceImplTest {
     }
 
     @Test
-    public void testFindOrderWithWaitingStatusBySpecialist() throws BadRequestException {
+    public void testFindOrderWithWaitingStatusBySpecialist() {
         // given
         Specialist specialist = new Specialist();
         specialist.setFirstName("SpecialistFirstname");
         specialist.setLastName("SpecialistLastname");
         specialist.setEmailAddress("Specialistt@gmail.com");
         specialist.setUsername("Specialist");
+        specialist.setActive(true);
         specialist.setPassword("Spe12345");
         specialist.setSpecialistStatus(SpecialistStatus.ACCEPTED);
         specialistService.save(specialist);
