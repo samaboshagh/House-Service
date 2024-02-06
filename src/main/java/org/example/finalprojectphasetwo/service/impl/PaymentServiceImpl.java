@@ -1,6 +1,6 @@
 package org.example.finalprojectphasetwo.service.impl;
 
-import org.example.finalprojectphasetwo.dto.PayWithCardDto;
+import org.example.finalprojectphasetwo.dto.request.PayWithCardDto;
 import org.example.finalprojectphasetwo.entity.Order;
 import org.example.finalprojectphasetwo.entity.Suggestion;
 import org.example.finalprojectphasetwo.exception.InvalidCaptchaException;

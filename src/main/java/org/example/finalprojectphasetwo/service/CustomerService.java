@@ -1,33 +1,36 @@
 package org.example.finalprojectphasetwo.service;
 
-import org.example.finalprojectphasetwo.dto.AddCommentDto;
-import org.example.finalprojectphasetwo.dto.PayWithCardDto;
-import org.example.finalprojectphasetwo.dto.UserSingUpDto;
+import org.example.finalprojectphasetwo.dto.request.OrderDto;
+import org.example.finalprojectphasetwo.dto.request.PayWithCardDto;
 import org.example.finalprojectphasetwo.entity.Comment;
-import org.example.finalprojectphasetwo.entity.Order;
 import org.example.finalprojectphasetwo.entity.Suggestion;
 import org.example.finalprojectphasetwo.entity.users.Customer;
 
 import java.util.List;
 
-@SuppressWarnings("unused")
 public interface CustomerService {
 
-    void customerSingUp(UserSingUpDto dto);
+    void customerSingUp(Customer customer);
 
-    List<Suggestion> findOrdersByCustomerAndOrderBySpecialistScore(Customer customer);
+    void changePassword(String username, String password);
 
-    List<Suggestion> findOrdersByCustomerAndOrderBySuggestionPrice(Customer customer);
+    Customer findByUsername(String username);
 
-    void chooseSuggestionByCustomer(Order order, Suggestion suggestion);
+    void addOrder(OrderDto orderDto);
 
-    void changeOrderStatusToStarted(Order order, Suggestion suggestion);
+    List<Suggestion> findSuggestionByCustomerAndOrderBySpecialistScore(String customerUsername);
 
-    void changeOrderStatusToDone(Order order);
+    List<Suggestion> findSuggestionsByCustomerAndOrderBySuggestionPrice(String customerUsername);
 
-    void payWithWalletCredit(Order order, Suggestion suggestion);
+    void chooseSuggestionByCustomer(Integer orderId, Integer SuggestionId);
 
-    void payWithCard(Order order, PayWithCardDto payWithCardDto, Suggestion suggestion);
+    void changeOrderStatusToStarted(Integer orderId, Integer suggestionId);
 
-    Comment addComment(AddCommentDto addCommentDto, Order order);
+    void changeOrderStatusToDone(Integer orderId);
+
+    void payWithWalletCredit(Integer orderId, Integer suggestionId);
+
+    void payWithCard(PayWithCardDto payWithCardDto);
+
+    void addComment(Comment comment, Integer orderId);
 }

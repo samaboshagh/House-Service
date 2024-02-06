@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class WalletServiceImpl implements WalletService {
 
     private final WalletRepository repository;
+
     private final OrderService orderService;
 
     @Transactional

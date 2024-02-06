@@ -1,30 +1,27 @@
 package org.example.finalprojectphasetwo.service;
 
 
-
-import org.apache.coyote.BadRequestException;
-import org.example.finalprojectphasetwo.entity.services.SubService;
+import org.example.finalprojectphasetwo.dto.request.AddAndDeleteSpecialistFromSubServiceRequest;
+import org.example.finalprojectphasetwo.dto.request.EditPriceAndDescriptionRequest;
+import org.example.finalprojectphasetwo.entity.services.MainService;
 import org.example.finalprojectphasetwo.entity.users.Admin;
-import org.example.finalprojectphasetwo.entity.users.Specialist;
-import org.example.finalprojectphasetwo.dto.MainServiceDto;
-import org.example.finalprojectphasetwo.dto.subServiceDto;
+import org.example.finalprojectphasetwo.dto.request.SubServiceDto;
 
-import java.util.Set;
 @SuppressWarnings("unused")
-public interface AdminService extends UserService<Admin>{
+public interface AdminService extends UserService<Admin> {
 
     void init();
 
-    void saveServiceByAdmin(MainServiceDto mainServiceDto);
+    void saveServiceByAdmin(MainService mainService);
 
-    void addSubServiceByAdmin(subServiceDto subServiceDto) throws BadRequestException;
+    void addSubServiceByAdmin(SubServiceDto subServiceDto);
 
-    void addSpecialistToSubServiceByAdmin(Specialist specialist, SubService subService) throws BadRequestException;
+    void addSpecialistToSubServiceByAdmin(AddAndDeleteSpecialistFromSubServiceRequest request);
 
-    void deleteSpecialistFromSubServiceByAdmin(Set<Specialist> specialists, Specialist specialist, SubService subService);
+    void deleteSpecialistFromSubServiceByAdmin(AddAndDeleteSpecialistFromSubServiceRequest request);
 
-    void setAcceptStatusForSpecialistByAdmin(Specialist specialist);
+    void setAcceptStatusForSpecialistByAdmin(String username);
 
-    void deleteAll();
+    void editDescriptionAndPrice(EditPriceAndDescriptionRequest request);
 
 }

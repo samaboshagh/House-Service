@@ -1,8 +1,8 @@
-package org.example.finalprojectphasetwo.dto;
+package org.example.finalprojectphasetwo.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.example.finalprojectphasetwo.entity.users.Specialist;
 
 import java.time.LocalDate;
 
@@ -11,17 +11,17 @@ import java.time.LocalDate;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
-public class createSuggestionDto {
+public class CreateSuggestionDto {
 
-    @NonNull
     Double suggestedPrice;
 
-    @NonNull
     LocalDate suggestedStartDate;
 
-    @NonNull
-    LocalDate workDuration;
+    Integer workDuration;
 
-    Specialist specialist;
+    @NotBlank
+    String specialistUsername;
+
+    Integer orderId;
 
 }

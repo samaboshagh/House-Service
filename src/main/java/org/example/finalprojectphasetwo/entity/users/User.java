@@ -44,7 +44,7 @@ public class User {
     @Column(columnDefinition = "boolean default false")
     boolean hasPermission;
 
-    LocalDate creationDate = LocalDate.now();
+    LocalDate creationDate;
 
     public User(String firstName, String lastName, String emailAddress, String username, String password) {
         this.firstName = firstName;

@@ -1,52 +1,56 @@
 package org.example.finalprojectphasetwo.service.impl;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
+import org.example.finalprojectphasetwo.dto.request.AddAndDeleteSpecialistFromSubServiceRequest;
+import org.example.finalprojectphasetwo.dto.request.EditPriceAndDescriptionRequest;
 import org.example.finalprojectphasetwo.entity.enumeration.SpecialistStatus;
 import org.example.finalprojectphasetwo.entity.services.MainService;
 import org.example.finalprojectphasetwo.entity.services.SubService;
 import org.example.finalprojectphasetwo.entity.users.Admin;
 import org.example.finalprojectphasetwo.entity.users.Specialist;
 import org.example.finalprojectphasetwo.exception.DuplicateException;
+import org.example.finalprojectphasetwo.exception.InvalidInputException;
 import org.example.finalprojectphasetwo.exception.SpecialistQualificationException;
-import org.example.finalprojectphasetwo.repository.*;
+import org.example.finalprojectphasetwo.repository.AdminRepository;
 import org.example.finalprojectphasetwo.service.AdminService;
 import org.example.finalprojectphasetwo.service.MainServiceService;
 import org.example.finalprojectphasetwo.service.SpecialistService;
 import org.example.finalprojectphasetwo.service.SubServiceService;
-import org.example.finalprojectphasetwo.dto.MainServiceDto;
-import org.example.finalprojectphasetwo.dto.subServiceDto;
+import org.example.finalprojectphasetwo.dto.request.SubServiceDto;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
+
+import java.util.HashSet;
 import java.util.Set;
 
 @Transactional(readOnly = true)
 @Service
 public class AdminServiceImpl
-        extends UserServiceImpl<Admin>
+        extends UserServiceImpl<Admin, AdminRepository>
         implements AdminService {
 
-    private final AdminRepository repository;
     private final SpecialistService specialistService;
     private final SubServiceService subServiceService;
     private final MainServiceService mainServiceService;
+    private final Validator validator;
 
-
-    public AdminServiceImpl(UserRepository<Admin> repository, AdminRepository repository1, SpecialistService specialistService, SubServiceService subServiceService, MainServiceService mainServiceService) {
-        super(repository);
-        this.repository = repository1;
+    public AdminServiceImpl(AdminRepository userRepository, SpecialistService specialistService, SubServiceService subServiceService, MainServiceService mainServiceService, Validator validator) {
+        super(userRepository);
         this.specialistService = specialistService;
         this.subServiceService = subServiceService;
         this.mainServiceService = mainServiceService;
+        this.validator = validator;
     }
 
 
     @Override
     @PostConstruct
     public void init() {
-        if (!repository.existsByUsername("admin")) {
-            repository.save(
+        if (!userRepository.existsByUsername("admin")) {
+            userRepository.save(
                     Admin
                             .builder()
                             .username("admin")
@@ -60,41 +64,49 @@ public class AdminServiceImpl
 
     @Override
     @Transactional
-    public void saveServiceByAdmin(MainServiceDto dto) {
-
-        MainService mainService = MainService
-                .builder()
-                .title(dto.getTitle())
-                .build();
-        mainServiceService.save(mainService);
-
+    public void saveServiceByAdmin(MainService mainService) {
+        Set<ConstraintViolation<MainService>> violations = validator.validate(mainService);
+        if (!violations.isEmpty()) {
+            throw new InvalidInputException("MAIN SERVICE TITLE CON NOT BE NULL");
+        }
+        if (mainServiceService.existsByTitle(mainService.getTitle()))
+            throw new DuplicateException("SERVICE ALREADY EXISTS");
+        if (mainService.getTitle() != null && !mainService.getTitle().isEmpty()) {
+            mainServiceService.save(mainService);
+        } else throw new InvalidInputException("MAIN SERVICE TITLE CON NOT BE NULL !");
     }
 
     @Override
     @Transactional
-    public void addSubServiceByAdmin(subServiceDto dto) {
-
-        Collection<SubService> subServices = subServiceService.findAll();
-        for (SubService sService : subServices) {
-            if (sService.getSubServiceTitle().equals(dto.getSubServiceTitle())) {
-                throw new DuplicateException("THIS SUB SERVICE ALREADY EXISTS");
-            }
+    public void addSubServiceByAdmin(SubServiceDto dto) {
+        Set<ConstraintViolation<SubServiceDto>> violations = validator.validate(dto);
+        if (!violations.isEmpty()) {
+            throw new InvalidInputException("SUB SERVICE TITLE CON NOT BE NULL");
         }
+        if (subServiceService.existsBySubServiceTitle(dto.getSubServiceTitle()))
+            throw new DuplicateException("SUB SERVICE ALREADY EXISTS");
+        MainService mainService = mainServiceService.findByTitle(dto.getMainServiceName());
         SubService subService = SubService
                 .builder()
                 .subServiceTitle(dto.getSubServiceTitle())
                 .basePrice(dto.getBasePrice())
                 .description(dto.getDescription())
-                .mainService(dto.getMainService())
+                .mainService(mainService)
                 .build();
         subServiceService.save(subService);
     }
 
     @Override
     @Transactional
-    public void addSpecialistToSubServiceByAdmin(Specialist specialist, SubService subService) {
-        Set<Specialist> specialists = subService.getSpecialists();
-        if (addSpecialistToSubServiceByAdminValidation(specialist, specialists)) {
+    public void addSpecialistToSubServiceByAdmin(AddAndDeleteSpecialistFromSubServiceRequest request) {
+        Set<ConstraintViolation<AddAndDeleteSpecialistFromSubServiceRequest>> violations = validator.validate(request);
+        if (!violations.isEmpty()) {
+            throw new InvalidInputException("SUB SERVICE TITLE OR SPECIALIST USERNAME CON NOT BE NULL");
+        }
+        SubService subService = subServiceService.findBySubServiceTitle(request.getSubServiceTitle());
+        Specialist specialist = specialistService.findByUsername(request.getSpecialistUsername());
+        Set<Specialist> specialists = new HashSet<>();
+        if (addSpecialistToSubServiceByAdminValidation(specialist)) {
             specialists.add(specialist);
             subService.setSpecialists(specialists);
             subServiceService.save(subService);
@@ -103,13 +115,17 @@ public class AdminServiceImpl
         }
     }
 
-    private boolean addSpecialistToSubServiceByAdminValidation(Specialist specialist, Set<Specialist> specialists) {
-        return specialist.getSpecialistStatus().equals(SpecialistStatus.ACCEPTED) && !specialists.isEmpty() && specialist.isActive();
-    }
-
     @Override
     @Transactional
-    public void deleteSpecialistFromSubServiceByAdmin(Set<Specialist> specialists, Specialist specialist, SubService subService) {
+    public void deleteSpecialistFromSubServiceByAdmin(AddAndDeleteSpecialistFromSubServiceRequest request) {
+        Set<ConstraintViolation<AddAndDeleteSpecialistFromSubServiceRequest>> violations = validator.validate(request);
+        if (!violations.isEmpty()) {
+            throw new InvalidInputException("SUB SERVICE TITLE OR SPECIALIST USERNAME CON NOT BE NULL");
+        }
+        SubService subService = subServiceService.findBySubServiceTitle(request.getSubServiceTitle());
+        Specialist specialist = specialistService.findByUsername(request.getSpecialistUsername());
+        Set<Specialist> specialists = subService.getSpecialists();
+        if (specialists.isEmpty()) throw new InvalidInputException("SPECIALIST DOES NOT HAVE ANY SUB SERVICE");
         specialists.remove(specialist);
         subService.setSpecialists(specialists);
         subServiceService.save(subService);
@@ -117,12 +133,23 @@ public class AdminServiceImpl
 
     @Override
     @Transactional
-    public void setAcceptStatusForSpecialistByAdmin(Specialist specialist) {
+    public void setAcceptStatusForSpecialistByAdmin(String username) {
+        if (username == null) throw new InvalidInputException("USER NAME IS NULL");
+        Specialist specialist = specialistService.findByUsername(username);
         specialist.setSpecialistStatus(SpecialistStatus.ACCEPTED);
         specialistService.save(specialist);
     }
 
-    public void deleteAll() {
-        repository.deleteAll();
+    @Override
+    public void editDescriptionAndPrice(EditPriceAndDescriptionRequest request) {
+        Set<ConstraintViolation<EditPriceAndDescriptionRequest>> violations = validator.validate(request);
+        if (!violations.isEmpty()) {
+            throw new InvalidInputException("SUB SERVICE TITLE OR DESCRIPTION CON NOT BE NULL");
+        }
+        subServiceService.editDescriptionAndPrice(request);
+    }
+
+    private boolean addSpecialistToSubServiceByAdminValidation(Specialist specialist) {
+        return specialist.getSpecialistStatus().equals(SpecialistStatus.ACCEPTED) && specialist.isActive();
     }
 }

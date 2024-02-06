@@ -22,7 +22,7 @@ public class SubService {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Integer id;
+    Integer id;
 
     String subServiceTitle;
 

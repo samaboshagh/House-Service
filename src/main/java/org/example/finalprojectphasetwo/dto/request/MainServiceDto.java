@@ -1,5 +1,6 @@
-package org.example.finalprojectphasetwo.dto;
+package org.example.finalprojectphasetwo.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -11,7 +12,7 @@ import lombok.experimental.FieldDefaults;
 @Getter
 public class MainServiceDto {
 
-    @NonNull
+    @NotBlank
     String title;
 
 }

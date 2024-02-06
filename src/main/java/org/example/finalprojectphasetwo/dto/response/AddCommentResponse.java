@@ -1,6 +1,5 @@
-package org.example.finalprojectphasetwo.dto;
+package org.example.finalprojectphasetwo.dto.response;
 
-import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -9,9 +8,8 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
-public class CommentDtoTOShowToSpecialist {
+public class AddCommentResponse {
 
-    @Size(max = 5)
     Integer score;
 
 }

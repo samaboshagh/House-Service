@@ -1,7 +1,7 @@
 package org.example.finalprojectphasetwo.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.example.finalprojectphasetwo.dto.PayWithCardDto;
+import org.example.finalprojectphasetwo.dto.request.PayWithCardDto;
 import org.example.finalprojectphasetwo.entity.Card;
 import org.example.finalprojectphasetwo.entity.Order;
 import org.example.finalprojectphasetwo.entity.enumeration.OrderStatus;

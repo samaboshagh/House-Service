@@ -1,9 +1,8 @@
-package org.example.finalprojectphasetwo.dto;
+package org.example.finalprojectphasetwo.dto.request;
 
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.example.finalprojectphasetwo.entity.Order;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,9 +14,8 @@ public class AddCommentDto {
     String comment;
 
     @Size(max = 5)
-    @NonNull
     Integer score;
 
-    Order order;
+    Integer orderId;
 
 }

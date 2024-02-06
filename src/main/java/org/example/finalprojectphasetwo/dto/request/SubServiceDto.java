@@ -1,8 +1,8 @@
-package org.example.finalprojectphasetwo.dto;
+package org.example.finalprojectphasetwo.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.example.finalprojectphasetwo.entity.services.MainService;
 
 @Getter
 @Setter
@@ -10,16 +10,16 @@ import org.example.finalprojectphasetwo.entity.services.MainService;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
-public class subServiceDto {
+public class SubServiceDto {
 
-    @NonNull
+    @NotBlank
     String subServiceTitle;
 
-    @NonNull
     Double basePrice;
 
     String description;
 
-    MainService mainService;
+    @NotBlank
+    String mainServiceName;
 
 }

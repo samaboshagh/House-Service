@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-
 public interface SuggestionRepository extends JpaRepository<Suggestion, Integer> {
 
     @Query("FROM Suggestion s WHERE s.order.customer = :customer ORDER BY s.suggestedPrice ASC")

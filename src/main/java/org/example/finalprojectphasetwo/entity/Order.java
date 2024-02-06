@@ -1,6 +1,5 @@
 package org.example.finalprojectphasetwo.entity;
 
-import jakarta.validation.constraints.Future;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -30,7 +29,6 @@ public class Order {
 
     Double suggestedPrice;
 
-    @Future
     LocalDate timeOfOrder;
 
     String address;

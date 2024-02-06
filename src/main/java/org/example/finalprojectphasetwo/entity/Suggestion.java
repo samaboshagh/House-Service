@@ -1,7 +1,6 @@
 package org.example.finalprojectphasetwo.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Future;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.example.finalprojectphasetwo.entity.users.Specialist;
@@ -22,14 +21,13 @@ public class Suggestion {
     @GeneratedValue(strategy = GenerationType.AUTO)
     Integer id;
 
-    LocalDate suggestionCreationDate = LocalDate.now();
+    LocalDate suggestionCreationDate;
 
     Double suggestedPrice;
 
-    @Future
     LocalDate suggestedStartDate;
 
-    LocalDate workDuration;
+    Integer workDuration;
 
     @ManyToOne
     Specialist specialist;

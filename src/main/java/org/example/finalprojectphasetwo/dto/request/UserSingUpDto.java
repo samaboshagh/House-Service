@@ -1,11 +1,12 @@
-package org.example.finalprojectphasetwo.dto;
+package org.example.finalprojectphasetwo.dto.request;
 
-import jakarta.persistence.Column;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.example.finalprojectphasetwo.entity.Wallet;
+
+import java.time.LocalDate;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,18 +24,16 @@ public class UserSingUpDto {
     @Email(message = "INVALID EMAIL")
     String emailAddress;
 
-    @NonNull
+    @NotBlank
     String username;
 
-    @Column(nullable = false)
     @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8}$",
             message = "INVALID PASSWORD")
     String password;
 
-    Wallet wallet;
+    LocalDate creationDate = LocalDate.now();
 
     boolean isActive;
 
     boolean hasPermission;
-
 }
