@@ -5,25 +5,24 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import org.example.finalprojectphasetwo.dto.request.AddAndDeleteSpecialistFromSubServiceRequest;
 import org.example.finalprojectphasetwo.dto.request.EditPriceAndDescriptionRequest;
+import org.example.finalprojectphasetwo.dto.request.SearchForUsers;
 import org.example.finalprojectphasetwo.entity.enumeration.SpecialistStatus;
 import org.example.finalprojectphasetwo.entity.services.MainService;
 import org.example.finalprojectphasetwo.entity.services.SubService;
 import org.example.finalprojectphasetwo.entity.users.Admin;
 import org.example.finalprojectphasetwo.entity.users.Specialist;
+import org.example.finalprojectphasetwo.entity.users.User;
 import org.example.finalprojectphasetwo.exception.DuplicateException;
 import org.example.finalprojectphasetwo.exception.InvalidInputException;
 import org.example.finalprojectphasetwo.exception.SpecialistQualificationException;
 import org.example.finalprojectphasetwo.repository.AdminRepository;
-import org.example.finalprojectphasetwo.service.AdminService;
-import org.example.finalprojectphasetwo.service.MainServiceService;
-import org.example.finalprojectphasetwo.service.SpecialistService;
-import org.example.finalprojectphasetwo.service.SubServiceService;
+import org.example.finalprojectphasetwo.service.*;
 import org.example.finalprojectphasetwo.dto.request.SubServiceDto;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
-import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Transactional(readOnly = true)
@@ -35,13 +34,15 @@ public class AdminServiceImpl
     private final SpecialistService specialistService;
     private final SubServiceService subServiceService;
     private final MainServiceService mainServiceService;
+    private final SearchUsersService searchUsersService;
     private final Validator validator;
 
-    public AdminServiceImpl(AdminRepository userRepository, SpecialistService specialistService, SubServiceService subServiceService, MainServiceService mainServiceService, Validator validator) {
+    public AdminServiceImpl(AdminRepository userRepository, SpecialistService specialistService, SubServiceService subServiceService, MainServiceService mainServiceService, SearchUsersService searchUsersService, Validator validator) {
         super(userRepository);
         this.specialistService = specialistService;
         this.subServiceService = subServiceService;
         this.mainServiceService = mainServiceService;
+        this.searchUsersService = searchUsersService;
         this.validator = validator;
     }
 
@@ -77,6 +78,11 @@ public class AdminServiceImpl
     }
 
     @Override
+    public List<MainService> showAllMainServices() {
+        return mainServiceService.findAll();
+    }
+
+    @Override
     @Transactional
     public void addSubServiceByAdmin(SubServiceDto dto) {
         Set<ConstraintViolation<SubServiceDto>> violations = validator.validate(dto);
@@ -97,15 +103,22 @@ public class AdminServiceImpl
     }
 
     @Override
+    public List<SubService> showAllSubServices() {
+        return subServiceService.findAll();
+    }
+
+    @Override
+    public List<Specialist> findAllSpecialist() {
+        return specialistService.findAll();
+    }
+
+    @Override
     @Transactional
     public void addSpecialistToSubServiceByAdmin(AddAndDeleteSpecialistFromSubServiceRequest request) {
-        Set<ConstraintViolation<AddAndDeleteSpecialistFromSubServiceRequest>> violations = validator.validate(request);
-        if (!violations.isEmpty()) {
-            throw new InvalidInputException("SUB SERVICE TITLE OR SPECIALIST USERNAME CON NOT BE NULL");
-        }
+        checkValidation(request);
         SubService subService = subServiceService.findBySubServiceTitle(request.getSubServiceTitle());
         Specialist specialist = specialistService.findByUsername(request.getSpecialistUsername());
-        Set<Specialist> specialists = new HashSet<>();
+        Set<Specialist> specialists = subService.getSpecialists();
         if (addSpecialistToSubServiceByAdminValidation(specialist)) {
             specialists.add(specialist);
             subService.setSpecialists(specialists);
@@ -118,10 +131,7 @@ public class AdminServiceImpl
     @Override
     @Transactional
     public void deleteSpecialistFromSubServiceByAdmin(AddAndDeleteSpecialistFromSubServiceRequest request) {
-        Set<ConstraintViolation<AddAndDeleteSpecialistFromSubServiceRequest>> violations = validator.validate(request);
-        if (!violations.isEmpty()) {
-            throw new InvalidInputException("SUB SERVICE TITLE OR SPECIALIST USERNAME CON NOT BE NULL");
-        }
+        checkValidation(request);
         SubService subService = subServiceService.findBySubServiceTitle(request.getSubServiceTitle());
         Specialist specialist = specialistService.findByUsername(request.getSpecialistUsername());
         Set<Specialist> specialists = subService.getSpecialists();
@@ -147,6 +157,23 @@ public class AdminServiceImpl
             throw new InvalidInputException("SUB SERVICE TITLE OR DESCRIPTION CON NOT BE NULL");
         }
         subServiceService.editDescriptionAndPrice(request);
+    }
+
+    @Override
+    public List<Specialist> findSpecialistBySpecialistStatus(SpecialistStatus status) {
+        return specialistService.findSpecialistBySpecialistStatus(status);
+    }
+
+    @Override
+    public List<User> searchUsersByAdmin(SearchForUsers search) {
+        return searchUsersService.searchForUsers(search);
+    }
+
+    private void checkValidation(AddAndDeleteSpecialistFromSubServiceRequest request) {
+        Set<ConstraintViolation<AddAndDeleteSpecialistFromSubServiceRequest>> violations = validator.validate(request);
+        if (!violations.isEmpty()) {
+            throw new InvalidInputException("SUB SERVICE TITLE OR SPECIALIST USERNAME CON NOT BE NULL");
+        }
     }
 
     private boolean addSpecialistToSubServiceByAdminValidation(Specialist specialist) {

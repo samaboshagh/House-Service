@@ -1,5 +1,6 @@
 package org.example.finalprojectphasetwo.entity.services;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -24,6 +25,7 @@ public class MainService  {
 
     String title;
 
+    @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "mainService")
     Set<SubService> subServices;
 

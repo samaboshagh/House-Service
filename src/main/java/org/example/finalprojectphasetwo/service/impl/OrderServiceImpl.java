@@ -59,6 +59,11 @@ public class OrderServiceImpl implements OrderService {
         } else throw new InvalidInputException("BASE PRICE IS MORE THAN SUGGESTED PRICE ! ");
     }
 
+    @Override
+    public List<Order> findAll() {
+        return repository.findAll();
+    }
+
     //  this method will use in controller and list that returns going to use for addSuggestionToOrderBySpecialist() method
     @Override
     public List<Order> findOrderWithWaitingStatusBySpecialist(Specialist specialist) {

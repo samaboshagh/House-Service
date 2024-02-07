@@ -4,12 +4,16 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import org.example.finalprojectphasetwo.dto.request.OrderDto;
 import org.example.finalprojectphasetwo.dto.request.PayWithCardDto;
+import org.example.finalprojectphasetwo.dto.request.SearchForUsers;
 import org.example.finalprojectphasetwo.entity.Comment;
 import org.example.finalprojectphasetwo.entity.Order;
 import org.example.finalprojectphasetwo.entity.Suggestion;
 import org.example.finalprojectphasetwo.entity.Wallet;
 import org.example.finalprojectphasetwo.entity.enumeration.OrderStatus;
+import org.example.finalprojectphasetwo.entity.services.MainService;
+import org.example.finalprojectphasetwo.entity.services.SubService;
 import org.example.finalprojectphasetwo.entity.users.Customer;
+import org.example.finalprojectphasetwo.entity.users.User;
 import org.example.finalprojectphasetwo.exception.InvalidInputException;
 import org.example.finalprojectphasetwo.exception.NotFoundException;
 import org.example.finalprojectphasetwo.repository.CustomerRepository;
@@ -29,6 +33,8 @@ public class CustomerServiceImpl
         implements CustomerService {
 
     private final SuggestionService suggestionService;
+    private final SubServiceService subServiceService;
+    private final MainServiceService mainServiceService;
     private final OrderService orderService;
     private final SpecialistService specialistService;
     private final WalletService walletService;
@@ -38,9 +44,11 @@ public class CustomerServiceImpl
 
     private ZonedDateTime chengOrderStatusToDoneDate;
 
-    public CustomerServiceImpl(CustomerRepository userRepository, SuggestionService suggestionService, OrderService orderService, SpecialistService specialistService, WalletService walletService, CommentService commentService, PaymentService paymentService, Validator validator) {
+    public CustomerServiceImpl(CustomerRepository userRepository, SuggestionService suggestionService, SubServiceService subServiceService, MainServiceService mainServiceService, OrderService orderService, SpecialistService specialistService, WalletService walletService, CommentService commentService, PaymentService paymentService, Validator validator) {
         super(userRepository);
         this.suggestionService = suggestionService;
+        this.subServiceService = subServiceService;
+        this.mainServiceService = mainServiceService;
         this.orderService = orderService;
         this.specialistService = specialistService;
         this.walletService = walletService;
@@ -54,6 +62,16 @@ public class CustomerServiceImpl
         return userRepository.findByUsername(username).orElseThrow(
                 () -> new NotFoundException("USER NOT FOUND")
         );
+    }
+
+    @Override
+    public List<MainService> showAllMainServices() {
+        return mainServiceService.findAll();
+    }
+
+    @Override
+    public List<SubService> showAllSubServices() {
+        return subServiceService.findAll();
     }
 
     @Transactional
@@ -96,20 +114,18 @@ public class CustomerServiceImpl
     }
 
     @Override
-    public void chooseSuggestionByCustomer(Integer orderId, Integer suggestionId) {
-        orderAndSuggestionValidation(orderId, suggestionId);
-        Order order = orderService.findById(orderId);
+    public void chooseSuggestionByCustomer(Integer suggestionId) {
+        orderAndSuggestionValidation(suggestionId);
         Suggestion suggestion = suggestionService.findById(suggestionId);
-        if (suggestion != null && order != null && order.getSuggestions().contains(suggestion)) {
-            orderService.changeOrderStatus(order, OrderStatus.WAITING_FOR_THE_SPECIALIST_TO_COME_TO_YOUR_PLACE);
-        } else throw new NotFoundException("INVALID INFORMATION !");
+        Order order = suggestion.getOrder();
+        orderService.changeOrderStatus(order, OrderStatus.WAITING_FOR_THE_SPECIALIST_TO_COME_TO_YOUR_PLACE);
     }
 
     @Override
-    public void changeOrderStatusToStarted(Integer orderId, Integer suggestionId) {
-        orderAndSuggestionValidation(orderId, suggestionId);
-        Order order = orderService.findById(orderId);
+    public void changeOrderStatusToStarted(Integer suggestionId) {
+        orderAndSuggestionValidation(suggestionId);
         Suggestion suggestion = suggestionService.findById(suggestionId);
+        Order order = suggestion.getOrder();
         if (changeOrderStatusToStartedValidation(order, suggestion)) {
             orderService.changeOrderStatus(order, OrderStatus.STARTED);
         } else throw new NotFoundException("INVALID INFORMATION !");
@@ -117,19 +133,21 @@ public class CustomerServiceImpl
 
 
     @Override
-    public void changeOrderStatusToDone(Integer orderId) {
-        Order order = orderService.findById(orderId);
-        if (orderId != null) {
+    public void changeOrderStatusToDone(Integer suggestionId) {
+        orderAndSuggestionValidation(suggestionId);
+        Suggestion suggestion = suggestionService.findById(suggestionId);
+        Order order = suggestion.getOrder();
+        if (changeOrderStatusToStartedValidation(order, suggestion)) {
             orderService.changeOrderStatus(order, OrderStatus.DONE);
-            chengOrderStatusToDoneDate = ZonedDateTime.now();
-        } else throw new NotFoundException("ORDER NOT FOUND");
+        } else throw new NotFoundException("INVALID INFORMATION !");
+        chengOrderStatusToDoneDate = ZonedDateTime.now();
     }
 
     @Override
-    public void payWithWalletCredit(Integer orderId, Integer suggestionId) {
-        orderAndSuggestionValidation(orderId, suggestionId);
-        Order order = orderService.findById(orderId);
+    public void payWithWalletCredit(Integer suggestionId) {
+        orderAndSuggestionValidation(suggestionId);
         Suggestion suggestion = suggestionService.findById(suggestionId);
+        Order order = suggestion.getOrder();
         paymentService.payWithWalletCredit(order, suggestion);
         checkIfSpecialistHasDelay(suggestion);
     }
@@ -173,8 +191,8 @@ public class CustomerServiceImpl
         }
     }
 
-    private void orderAndSuggestionValidation(Integer orderId, Integer suggestionId) {
-        if (orderId == null && suggestionId == null)
+    private void orderAndSuggestionValidation(Integer suggestionId) {
+        if (suggestionId == null)
             throw new NotFoundException("ORDER ID OR SUGGESTION ID CAN NOT BE NULL");
     }
 }

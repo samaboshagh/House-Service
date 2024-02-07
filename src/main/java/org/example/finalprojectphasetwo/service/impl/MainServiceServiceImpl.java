@@ -8,6 +8,8 @@ import org.example.finalprojectphasetwo.service.MainServiceService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Service
@@ -31,5 +33,10 @@ public class MainServiceServiceImpl implements MainServiceService {
     @Override
     public Boolean existsByTitle(String title) {
         return mainServiceRepository.existsByTitle(title);
+    }
+
+    @Override
+    public List<MainService> findAll() {
+        return mainServiceRepository.findAll();
     }
 }

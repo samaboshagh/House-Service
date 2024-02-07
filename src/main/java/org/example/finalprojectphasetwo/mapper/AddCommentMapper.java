@@ -6,6 +6,8 @@ import org.example.finalprojectphasetwo.entity.Comment;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface AddCommentMapper {
 
@@ -14,5 +16,7 @@ public interface AddCommentMapper {
     Comment convertToDto(AddCommentDto addCommentDto);
 
     AddCommentResponse dtoToCustomer(Comment comment);
+
+    List<AddCommentResponse> dtoToCustomers(List<Comment> comment);
 
 }

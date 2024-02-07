@@ -1,5 +1,6 @@
 package org.example.finalprojectphasetwo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -45,6 +46,7 @@ public class Order {
     @Column(columnDefinition = "boolean default false")
     boolean isPaid;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "order", cascade = CascadeType.MERGE)
     List<Suggestion> suggestions;
 

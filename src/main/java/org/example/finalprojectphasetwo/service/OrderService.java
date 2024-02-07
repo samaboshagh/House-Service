@@ -12,6 +12,8 @@ public interface OrderService {
 
     void addOrder(OrderDto orderDto);
 
+    List<Order> findAll();
+
     List<Order> findOrderWithWaitingStatusBySpecialist(Specialist specialist);
 
     void changeOrderStatus(Order order, OrderStatus status);

@@ -1,5 +1,6 @@
 package org.example.finalprojectphasetwo.entity.services;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -33,10 +34,12 @@ public class SubService {
     @ManyToOne
     MainService mainService;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "subService", cascade = CascadeType.MERGE)
     List<Order> order;
 
     @ManyToMany
+    @JsonIgnore
     Set<Specialist> specialists;
 
     @Override

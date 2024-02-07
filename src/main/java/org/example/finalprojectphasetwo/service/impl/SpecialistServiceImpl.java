@@ -2,6 +2,8 @@ package org.example.finalprojectphasetwo.service.impl;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
+import org.example.finalprojectphasetwo.entity.Comment;
+import org.example.finalprojectphasetwo.entity.Order;
 import org.example.finalprojectphasetwo.entity.Suggestion;
 import org.example.finalprojectphasetwo.entity.Wallet;
 import org.example.finalprojectphasetwo.entity.enumeration.SpecialistStatus;
@@ -11,9 +13,7 @@ import org.example.finalprojectphasetwo.exception.NotFoundException;
 import org.example.finalprojectphasetwo.exception.SpecialistQualificationException;
 import org.example.finalprojectphasetwo.exception.WrongTimeException;
 import org.example.finalprojectphasetwo.repository.SpecialistRepository;
-import org.example.finalprojectphasetwo.service.SpecialistService;
-import org.example.finalprojectphasetwo.service.SuggestionService;
-import org.example.finalprojectphasetwo.service.WalletService;
+import org.example.finalprojectphasetwo.service.*;
 import org.example.finalprojectphasetwo.dto.request.CreateSuggestionDto;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 @Transactional(readOnly = true)
@@ -35,12 +36,16 @@ public class SpecialistServiceImpl
 
     private final WalletService walletService;
     private final SuggestionService suggestionService;
+    private final CommentService commentService;
+    private final OrderService orderService;
     private final Validator validator;
 
-    public SpecialistServiceImpl(SpecialistRepository userRepository, WalletService walletService, SuggestionService suggestionService, Validator validator) {
+    public SpecialistServiceImpl(SpecialistRepository userRepository, WalletService walletService, SuggestionService suggestionService, CommentService commentService, OrderService orderService, Validator validator) {
         super(userRepository);
         this.walletService = walletService;
         this.suggestionService = suggestionService;
+        this.commentService = commentService;
+        this.orderService = orderService;
         this.validator = validator;
     }
 
@@ -49,6 +54,11 @@ public class SpecialistServiceImpl
     @Override
     public Specialist save(Specialist specialist) {
         return userRepository.save(specialist);
+    }
+
+    @Override
+    public List<Specialist> findAll() {
+        return userRepository.findAll();
     }
 
     @Override
@@ -72,8 +82,9 @@ public class SpecialistServiceImpl
     }
 
     @Override
+    @Transactional
     public void changePassword(String username, String password) {
-        if (username == null && password == null)
+        if (username.isBlank() && password.isBlank())
             throw new NotFoundException("USERNAME OR PASSWORD CANNOT BE NULL");
         Specialist specialist = findByUsername(username);
         if (specialist.getSpecialistStatus().equals(SpecialistStatus.WARNING) ||
@@ -99,6 +110,11 @@ public class SpecialistServiceImpl
             return filePath;
         }
         return null;
+    }
+
+    @Override
+    public List<Order> findAllOrders() {
+        return orderService.findAll();
     }
 
     @Transactional
@@ -138,5 +154,16 @@ public class SpecialistServiceImpl
             wallet.setCreditAmount(suggestion.getSuggestedPrice() * 0.7);
             walletService.save(wallet);
         }
+    }
+
+    @Override
+    public List<Comment> findAllBySpecialist(String specialistUsername) {
+        Specialist specialist = findByUsername(specialistUsername);
+        return commentService.findAllBySpecialist(specialist);
+    }
+
+    @Override
+    public List<Specialist> findSpecialistBySpecialistStatus(SpecialistStatus status) {
+        return userRepository.findSpecialistBySpecialistStatus(status);
     }
 }

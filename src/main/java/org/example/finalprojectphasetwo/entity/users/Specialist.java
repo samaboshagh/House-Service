@@ -1,5 +1,6 @@
 package org.example.finalprojectphasetwo.entity.users;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -9,6 +10,7 @@ import lombok.experimental.FieldDefaults;
 
 import jakarta.persistence.*;
 import lombok.experimental.SuperBuilder;
+import org.example.finalprojectphasetwo.entity.Comment;
 import org.example.finalprojectphasetwo.entity.Suggestion;
 import org.example.finalprojectphasetwo.entity.Wallet;
 import org.example.finalprojectphasetwo.entity.enumeration.SpecialistStatus;
@@ -32,16 +34,22 @@ public class Specialist extends User {
 
     @Min(0)
     @Max(5)
-    Integer star = 0;
+    Integer star;
 
     @Lob
+    @JsonIgnore
     byte[] profileImage;
 
     @OneToOne
     Wallet wallet;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "specialist", cascade = CascadeType.ALL)
     List<Suggestion> suggestions;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "specialist", cascade = CascadeType.MERGE)
+    List<Comment> comments;
 
 
     public Specialist(

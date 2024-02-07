@@ -1,5 +1,6 @@
 package org.example.finalprojectphasetwo.entity.users;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -24,6 +25,7 @@ import java.util.List;
 @Entity
 public class Customer extends User {
 
+    @JsonIgnore
     @OneToMany(mappedBy = "customer", cascade = CascadeType.MERGE)
     List<Order> orders;
 

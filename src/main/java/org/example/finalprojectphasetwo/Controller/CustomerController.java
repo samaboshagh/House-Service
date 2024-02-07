@@ -11,6 +11,8 @@ import org.example.finalprojectphasetwo.dto.response.AddCommentResponse;
 import org.example.finalprojectphasetwo.dto.response.CreateCustomerResponse;
 import org.example.finalprojectphasetwo.entity.Comment;
 import org.example.finalprojectphasetwo.entity.Suggestion;
+import org.example.finalprojectphasetwo.entity.services.MainService;
+import org.example.finalprojectphasetwo.entity.services.SubService;
 import org.example.finalprojectphasetwo.entity.users.Customer;
 import org.example.finalprojectphasetwo.exception.InvalidInputException;
 import org.example.finalprojectphasetwo.mapper.AddCommentMapper;
@@ -25,6 +27,7 @@ import java.util.List;
 import java.util.Set;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/customer")
 @AllArgsConstructor
 public class CustomerController {
@@ -49,8 +52,19 @@ public class CustomerController {
     }
 
     @PutMapping("/change_password")
-    public void changePassword(@RequestParam String username, @RequestParam String password) {
+    public ResponseEntity<String> changePassword(@RequestParam String username, @RequestParam String password) {
         customerService.changePassword(username, password);
+        return new ResponseEntity<>("PASSWORD CHANGED SUCCESSFULLY", HttpStatus.OK);
+    }
+
+    @GetMapping("/show_all_mainServices")
+    public List<MainService> showAllMainServices() {
+        return customerService.showAllMainServices();
+    }
+
+    @GetMapping("/show_all_subServices")
+    public List<SubService> showAllSubServices() {
+        return customerService.showAllSubServices();
     }
 
     @PostMapping("/add_order")
@@ -73,29 +87,30 @@ public class CustomerController {
     }
 
     @PutMapping("/select_suggestion")
-    public ResponseEntity<String> chooseSuggestionByCustomer(@RequestParam Integer orderId, @RequestParam Integer suggestionId) {
-        customerService.chooseSuggestionByCustomer(orderId, suggestionId);
+    public ResponseEntity<String> chooseSuggestion(@RequestParam Integer suggestionId) {
+        customerService.chooseSuggestionByCustomer(suggestionId);
         return new ResponseEntity<>("SUGGESTION SUCCESSFULLY SELECTED", HttpStatus.OK);
     }
 
     @PutMapping("/start_order")
-    public ResponseEntity<String> changeOrderStatusToStarted(@RequestParam Integer orderId, @RequestParam Integer suggestionId) {
-        customerService.changeOrderStatusToStarted(orderId, suggestionId);
+    public ResponseEntity<String> changeOrderStatusToStarted(@RequestParam Integer suggestionId) {
+        customerService.changeOrderStatusToStarted(suggestionId);
         return new ResponseEntity<>("ORDER STARTED", HttpStatus.OK);
     }
 
     @PutMapping("/change_order_status_to_done")
-    public ResponseEntity<String> changeOrderStatusToDone(@RequestParam Integer id) {
-        customerService.changeOrderStatusToDone(id);
-        return new ResponseEntity<>("SUGGESTION SUCCESSFULLY SELECTED", HttpStatus.OK);
+    public ResponseEntity<String> changeOrderStatusToDone(@RequestParam Integer suggestionId) {
+        customerService.changeOrderStatusToDone(suggestionId);
+        return new ResponseEntity<>("", HttpStatus.OK);
     }
 
     @PutMapping("/pay_with_credit")
-    public ResponseEntity<String> payWithWalletCredit(@RequestParam Integer orderId, @RequestParam Integer suggestionId) {
-        customerService.payWithWalletCredit(orderId, suggestionId);
+    public ResponseEntity<String> payWithWalletCredit(@RequestParam Integer suggestionId) {
+        customerService.payWithWalletCredit(suggestionId);
         return new ResponseEntity<>("SUCCESSFULLY PAID", HttpStatus.OK);
     }
 
+    @CrossOrigin
     @PostMapping("/pay_with_card")
     public ResponseEntity<String> payWithCard(@RequestBody PayWithCardDto payWithCardDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
@@ -120,5 +135,4 @@ public class CustomerController {
         AddCommentResponse addCommentResponse = AddCommentMapper.INSTANCE.dtoToCustomer(comment);
         return new ResponseEntity<>(addCommentResponse, HttpStatus.OK);
     }
-
 }

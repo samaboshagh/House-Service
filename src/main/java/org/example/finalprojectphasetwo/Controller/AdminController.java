@@ -1,11 +1,12 @@
 package org.example.finalprojectphasetwo.Controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.finalprojectphasetwo.dto.request.AddAndDeleteSpecialistFromSubServiceRequest;
-import org.example.finalprojectphasetwo.dto.request.EditPriceAndDescriptionRequest;
-import org.example.finalprojectphasetwo.dto.request.MainServiceDto;
-import org.example.finalprojectphasetwo.dto.request.SubServiceDto;
+import org.example.finalprojectphasetwo.dto.request.*;
+import org.example.finalprojectphasetwo.entity.enumeration.SpecialistStatus;
 import org.example.finalprojectphasetwo.entity.services.MainService;
+import org.example.finalprojectphasetwo.entity.services.SubService;
+import org.example.finalprojectphasetwo.entity.users.Specialist;
+import org.example.finalprojectphasetwo.entity.users.User;
 import org.example.finalprojectphasetwo.mapper.MainServiceMapper;
 import org.example.finalprojectphasetwo.service.AdminService;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/admin")
@@ -32,6 +35,11 @@ public class AdminController {
         return new ResponseEntity<>(mainServiceDto, HttpStatus.CREATED);
     }
 
+    @GetMapping("/show_all_MainServices")
+    public List<MainService> showAll() {
+        return adminService.showAllMainServices();
+    }
+
     @PostMapping("/add_sub_service")
     public ResponseEntity<SubServiceDto> addSubService(@RequestBody SubServiceDto subServiceDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
@@ -40,6 +48,18 @@ public class AdminController {
         adminService.addSubServiceByAdmin(subServiceDto);
         return new ResponseEntity<>(subServiceDto, HttpStatus.CREATED);
     }
+
+    @GetMapping("/show_all_subServices")
+    public List<SubService> showAllSubServices() {
+        return adminService.showAllSubServices();
+    }
+
+
+    @GetMapping("/show_all_specialists")
+    public List<Specialist> findAllSpecialist() {
+        return adminService.findAllSpecialist();
+    }
+
 
     @PutMapping("/add_specialist_to_sub_service")
     public ResponseEntity<AddAndDeleteSpecialistFromSubServiceRequest> addSpecialistToSubService(@RequestBody AddAndDeleteSpecialistFromSubServiceRequest request, BindingResult bindingResult) {
@@ -59,6 +79,11 @@ public class AdminController {
         return new ResponseEntity<>(request, HttpStatus.NO_CONTENT);
     }
 
+    @GetMapping("/show_specialist_by_status")
+    public List<Specialist> findSpecialistBySpecialistStatus(@RequestParam SpecialistStatus status) {
+        return adminService.findSpecialistBySpecialistStatus(status);
+    }
+
     @PutMapping("update_specialist_status")
     public ResponseEntity<HttpStatus> setAcceptStatusForSpecialist(@RequestParam String username) {
         adminService.setAcceptStatusForSpecialistByAdmin(username);
@@ -72,5 +97,10 @@ public class AdminController {
         }
         adminService.editDescriptionAndPrice(request);
         return new ResponseEntity<>(request, HttpStatus.OK);
+    }
+
+    @GetMapping("/search")
+    public List<User> searchUsersByAdmin(@RequestBody SearchForUsers search) {
+        return adminService.searchUsersByAdmin(search);
     }
 }
