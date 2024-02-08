@@ -119,14 +119,13 @@ public class AdminServiceImpl
         SubService subService = subServiceService.findBySubServiceTitle(request.getSubServiceTitle());
         Specialist specialist = specialistService.findByUsername(request.getSpecialistUsername());
         Set<Specialist> specialists = subService.getSpecialists();
-        if (addSpecialistToSubServiceByAdminValidation(specialist)) {
-            specialists.add(specialist);
-            subService.setSpecialists(specialists);
-            subServiceService.save(subService);
-        } else {
+        if (!addSpecialistToSubServiceByAdminValidation(specialist))
             throw new SpecialistQualificationException("SPECIALIST IS NOT QUALIFIED !");
-        }
+        specialists.add(specialist);
+        subService.setSpecialists(specialists);
+        subServiceService.save(subService);
     }
+
 
     @Override
     @Transactional

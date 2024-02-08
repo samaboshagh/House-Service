@@ -1,5 +1,6 @@
 package org.example.finalprojectphasetwo.service.impl;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import org.example.finalprojectphasetwo.entity.Comment;
@@ -23,7 +24,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -124,7 +125,7 @@ public class SpecialistServiceImpl
         if (!violations.isEmpty()) {
             throw new InvalidInputException("SPECIALIST USER NAME CON NOT BE NULL");
         }
-        if (dto.getSuggestedStartDate().isBefore(LocalDate.now())) throw new WrongTimeException("NOT RIGHT TIME !");
+        if (dto.getSuggestedStartDate().isBefore(ZonedDateTime.now())) throw new WrongTimeException("NOT RIGHT TIME !");
         suggestionService.addSuggestion(dto);
     }
 
@@ -142,16 +143,30 @@ public class SpecialistServiceImpl
     @Transactional
     public void reducingScore(Specialist specialist) {
         if (userRepository.findByUsername(specialist.getUsername()).isPresent()) {
-            specialist.setStar(specialist.getStar() - 1);
+
+            int star = specialist.getStar() - 1;
+            specialist.setStar(star);
             userRepository.save(specialist);
         }
+    }
+
+    private void getAverageScore(Specialist specialist) {
+        int totalScore = 0;
+        int commentCount = 0;
+        for (Comment comment : specialist.getComments()) {
+            totalScore += comment.getScore();
+            commentCount++;
+        }
+        Integer averageScore = (commentCount > 0) ? totalScore / commentCount : 0;
+        specialist.setStar(averageScore);
+        userRepository.save(specialist);
     }
 
     @Override
     public void specialistGetPayment(Suggestion suggestion) {
         if (suggestion != null && userRepository.findByUsername(suggestion.getSpecialist().getUsername()).isPresent()) {
             Wallet wallet = suggestion.getSpecialist().getWallet();
-            wallet.setCreditAmount(suggestion.getSuggestedPrice() * 0.7);
+            wallet.setCreditAmount(wallet.getCreditAmount() + (suggestion.getSuggestedPrice() * 0.7));
             walletService.save(wallet);
         }
     }

@@ -30,8 +30,8 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public void payWithCard(Order order, PayWithCardDto payWithCardDto, Suggestion suggestion) {
-        cardService.payWithCard(order, payWithCardDto);
+    public void payWithCard(PayWithCardDto payWithCardDto, Suggestion suggestion) {
+        cardService.payWithCard(payWithCardDto);
         specialistGetPayment(suggestion);
     }
 

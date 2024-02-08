@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.time.LocalDate;
+import java.time.ZonedDateTime;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,7 +15,7 @@ public class CreateSuggestionDto {
 
     Double suggestedPrice;
 
-    LocalDate suggestedStartDate;
+    ZonedDateTime suggestedStartDate;
 
     Integer workDuration;
 

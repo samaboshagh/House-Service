@@ -2,6 +2,7 @@ package org.example.finalprojectphasetwo.dto.request;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.example.finalprojectphasetwo.entity.enumeration.Role;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,5 +22,7 @@ public class SearchForUsers {
     Integer star;
 
     String username;
+
+    Role role;
 
 }

@@ -10,6 +10,7 @@ import org.example.finalprojectphasetwo.entity.services.SubService;
 import org.example.finalprojectphasetwo.entity.users.Customer;
 
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Getter
@@ -33,6 +34,8 @@ public class Order {
     LocalDate timeOfOrder;
 
     String address;
+
+    ZonedDateTime OrderEndTime;
 
     @ManyToOne
     Customer customer;

@@ -13,4 +13,6 @@ public interface CommentService {
 
     List<Comment> findAllBySpecialist(Specialist specialist);
 
+    Boolean existsByOrder(Order order);
+
 }

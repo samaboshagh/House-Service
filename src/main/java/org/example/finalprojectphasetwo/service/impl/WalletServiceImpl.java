@@ -43,8 +43,10 @@ public class WalletServiceImpl implements WalletService {
                     order.getCustomer().getWallet().getCreditAmount() - suggestion.getSuggestedPrice()
             );
             repository.save(wallet);
+            order.setPaid(true);
+            orderService.save(order);
             orderService.changeOrderStatus(order, OrderStatus.PAID);
-        } else throw new InvalidInputException("INVALID INFORMATION !");
+        } else throw new InvalidInputException("ALREADY PAID FOR THIS ORDER !");
     }
 
     private Boolean payWithWalletCreditValidation(Order order, Suggestion suggestion) {

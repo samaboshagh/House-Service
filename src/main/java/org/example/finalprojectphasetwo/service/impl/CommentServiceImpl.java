@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.finalprojectphasetwo.entity.Comment;
 import org.example.finalprojectphasetwo.entity.Order;
 import org.example.finalprojectphasetwo.entity.users.Specialist;
+import org.example.finalprojectphasetwo.exception.DuplicateException;
 import org.example.finalprojectphasetwo.repository.CommentRepository;
 import org.example.finalprojectphasetwo.service.CommentService;
 import org.springframework.stereotype.Service;
@@ -20,13 +21,18 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public void addCommentToOrder(Comment comment, Order order) {
+        if (existsByOrder(order)) throw new DuplicateException("YOU CAN NOT HAVE SECOND COMMENT FOR SAME ORDER !");
         comment.setOrder(order);
         commentRepository.save(comment);
-
     }
 
     @Override
     public List<Comment> findAllBySpecialist(Specialist specialist) {
         return commentRepository.findAllBySpecialist(specialist);
+    }
+
+    @Override
+    public Boolean existsByOrder(Order order) {
+        return commentRepository.existsByOrder(order);
     }
 }

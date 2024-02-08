@@ -4,7 +4,6 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import org.example.finalprojectphasetwo.dto.request.OrderDto;
 import org.example.finalprojectphasetwo.dto.request.PayWithCardDto;
-import org.example.finalprojectphasetwo.dto.request.SearchForUsers;
 import org.example.finalprojectphasetwo.entity.Comment;
 import org.example.finalprojectphasetwo.entity.Order;
 import org.example.finalprojectphasetwo.entity.Suggestion;
@@ -13,7 +12,7 @@ import org.example.finalprojectphasetwo.entity.enumeration.OrderStatus;
 import org.example.finalprojectphasetwo.entity.services.MainService;
 import org.example.finalprojectphasetwo.entity.services.SubService;
 import org.example.finalprojectphasetwo.entity.users.Customer;
-import org.example.finalprojectphasetwo.entity.users.User;
+import org.example.finalprojectphasetwo.exception.DuplicateException;
 import org.example.finalprojectphasetwo.exception.InvalidInputException;
 import org.example.finalprojectphasetwo.exception.NotFoundException;
 import org.example.finalprojectphasetwo.repository.CustomerRepository;
@@ -21,7 +20,6 @@ import org.example.finalprojectphasetwo.service.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Set;
@@ -41,8 +39,6 @@ public class CustomerServiceImpl
     private final CommentService commentService;
     private final PaymentService paymentService;
     private final Validator validator;
-
-    private ZonedDateTime chengOrderStatusToDoneDate;
 
     public CustomerServiceImpl(CustomerRepository userRepository, SuggestionService suggestionService, SubServiceService subServiceService, MainServiceService mainServiceService, OrderService orderService, SpecialistService specialistService, WalletService walletService, CommentService commentService, PaymentService paymentService, Validator validator) {
         super(userRepository);
@@ -126,7 +122,8 @@ public class CustomerServiceImpl
         orderAndSuggestionValidation(suggestionId);
         Suggestion suggestion = suggestionService.findById(suggestionId);
         Order order = suggestion.getOrder();
-        if (changeOrderStatusToStartedValidation(order, suggestion)) {
+        if (changeOrderStatusToStartedValidation(order, suggestion) &&
+            order.getStatus().equals(OrderStatus.WAITING_FOR_THE_SPECIALIST_TO_COME_TO_YOUR_PLACE)) {
             orderService.changeOrderStatus(order, OrderStatus.STARTED);
         } else throw new NotFoundException("INVALID INFORMATION !");
     }
@@ -137,10 +134,12 @@ public class CustomerServiceImpl
         orderAndSuggestionValidation(suggestionId);
         Suggestion suggestion = suggestionService.findById(suggestionId);
         Order order = suggestion.getOrder();
-        if (changeOrderStatusToStartedValidation(order, suggestion)) {
+        if (changeOrderStatusToStartedValidation(order, suggestion) &&
+            order.getStatus().equals(OrderStatus.STARTED)) {
             orderService.changeOrderStatus(order, OrderStatus.DONE);
         } else throw new NotFoundException("INVALID INFORMATION !");
-        chengOrderStatusToDoneDate = ZonedDateTime.now();
+        order.setOrderEndTime(ZonedDateTime.now());
+        orderService.save(order);
     }
 
     @Override
@@ -160,7 +159,7 @@ public class CustomerServiceImpl
         }
         Order order = orderService.findById(dto.getOrderId());
         Suggestion suggestion = suggestionService.findById(dto.getSuggestionId());
-        paymentService.payWithCard(order, dto, suggestion);
+        paymentService.payWithCard(dto, suggestion);
         checkIfSpecialistHasDelay(suggestion);
     }
 
@@ -175,24 +174,26 @@ public class CustomerServiceImpl
     private static boolean changeOrderStatusToStartedValidation(Order order, Suggestion suggestion) {
         if (order != null && suggestion != null) {
             if (suggestion.getOrder().equals(order)) {
-                return suggestion.getSuggestedStartDate().isAfter(LocalDate.now());
+                return suggestion.getSuggestedStartDate().isAfter(ZonedDateTime.now());
             }
         }
         return false;
     }
 
     private void checkIfSpecialistHasDelay(Suggestion suggestion) {
-        int hours = chengOrderStatusToDoneDate.getHour() - suggestion.getWorkDuration();
-        for (int i = 0; i < hours; i++) {
-            specialistService.reducingScore(suggestion.getSpecialist());
-        }
-        if (suggestion.getSpecialist().getStar() < 0) {
-            specialistService.demotionOfTheSpecialist(suggestion.getSpecialist());
+        int hours = suggestion.getOrder().getOrderEndTime().getHour() - suggestion.getSuggestedStartDate().getHour();
+        if (hours > suggestion.getWorkDuration()) {
+            for (int i = 0; i < hours; i++) {
+                specialistService.reducingScore(suggestion.getSpecialist());
+            }
+            if (suggestion.getSpecialist().getStar() < 0) {
+                specialistService.demotionOfTheSpecialist(suggestion.getSpecialist());
+            }
         }
     }
 
     private void orderAndSuggestionValidation(Integer suggestionId) {
         if (suggestionId == null)
-            throw new NotFoundException("ORDER ID OR SUGGESTION ID CAN NOT BE NULL");
+            throw new NotFoundException("SUGGESTION ID CAN NOT BE NULL !");
     }
 }

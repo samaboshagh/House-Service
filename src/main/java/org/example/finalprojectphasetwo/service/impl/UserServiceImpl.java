@@ -88,6 +88,10 @@ public class UserServiceImpl<T extends User, R extends UserRepository<T>>
             if (search.getUsername() != null) {
                 predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get("username"), search.getUsername()));
             }
+
+            if (search.getRole() != null) {
+                predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get("role"), search.getRole()));
+            }
             return predicate;
         };
     }

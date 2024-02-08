@@ -8,6 +8,7 @@ import lombok.experimental.FieldDefaults;
 
 import jakarta.persistence.*;
 import lombok.experimental.SuperBuilder;
+import org.example.finalprojectphasetwo.entity.enumeration.Role;
 
 import java.time.LocalDate;
 
@@ -46,18 +47,13 @@ public class User {
 
     LocalDate creationDate;
 
-    public User(String firstName, String lastName, String emailAddress, String username, String password) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.emailAddress = emailAddress;
-        this.username = username;
-        this.password = password;
-    }
+    @Enumerated(EnumType.STRING)
+    Role role;
 
     @Override
     public String toString() {
-        return "User{" +
-               "User id = " + getId() +
+        return "UserCaptcha{" +
+               "UserCaptcha id = " + getId() +
                " firstName =' " + firstName + '\'' +
                ", lastName =' " + lastName + '\'' +
                '}';

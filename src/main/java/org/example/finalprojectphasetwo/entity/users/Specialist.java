@@ -32,8 +32,6 @@ public class Specialist extends User {
 
     String specialization;
 
-    @Min(0)
-    @Max(5)
     Integer star;
 
     @Lob
@@ -51,25 +49,4 @@ public class Specialist extends User {
     @OneToMany(mappedBy = "specialist", cascade = CascadeType.MERGE)
     List<Comment> comments;
 
-
-    public Specialist(
-            @Pattern(regexp = "^[A-Za-z]+$") String firstName
-            , @Pattern(regexp = "^[A-Za-z]+$") String lastName
-            , @Email String emailAddress, String username
-            , @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8}$") String password
-            , Integer star
-    ) {
-        super(firstName, lastName, emailAddress, username, password);
-        this.star = star;
-    }
-
-    public Specialist(String firstName,
-                      String lastName,
-                      String emailAddress,
-                      String username,
-                      String password,
-                      SpecialistStatus specialistStatus) {
-        super(firstName, lastName, emailAddress, username, password);
-        this.specialistStatus = specialistStatus;
-    }
 }

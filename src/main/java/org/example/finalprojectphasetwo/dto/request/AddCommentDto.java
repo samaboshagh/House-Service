@@ -13,7 +13,6 @@ public class AddCommentDto {
 
     String comment;
 
-    @Size(max = 5)
     Integer score;
 
     Integer orderId;

@@ -35,12 +35,4 @@ public class Customer extends User {
     @OneToMany(mappedBy = "customer", cascade = CascadeType.MERGE)
     List<Card> card;
 
-    public Customer(String firstName, String lastName, String emailAddress, String username, String password) {
-        super(firstName, lastName, emailAddress, username, password);
-    }
-
-    public Customer(String firstName, String lastName, String emailAddress, String username, String password, List<Order> orders) {
-        super(firstName, lastName, emailAddress, username, password);
-        this.orders = orders;
-    }
 }

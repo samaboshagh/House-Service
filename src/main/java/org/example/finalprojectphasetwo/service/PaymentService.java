@@ -8,7 +8,7 @@ public interface PaymentService {
 
     void payWithWalletCredit(Order order, Suggestion suggestion);
 
-    void payWithCard(Order order, PayWithCardDto payWithCardDto, Suggestion suggestion);
+    void payWithCard(PayWithCardDto payWithCardDto, Suggestion suggestion);
 
     int generateCaptcha();
 

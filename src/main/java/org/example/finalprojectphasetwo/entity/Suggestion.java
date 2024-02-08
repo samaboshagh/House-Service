@@ -6,6 +6,7 @@ import lombok.experimental.FieldDefaults;
 import org.example.finalprojectphasetwo.entity.users.Specialist;
 
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 
 @Getter
 @Setter
@@ -25,7 +26,7 @@ public class Suggestion {
 
     Double suggestedPrice;
 
-    LocalDate suggestedStartDate;
+    ZonedDateTime suggestedStartDate;
 
     Integer workDuration;
 
