@@ -7,6 +7,7 @@ import org.example.finalprojectphasetwo.entity.Comment;
 import org.example.finalprojectphasetwo.entity.Order;
 import org.example.finalprojectphasetwo.entity.Suggestion;
 import org.example.finalprojectphasetwo.entity.Wallet;
+import org.example.finalprojectphasetwo.entity.enumeration.Role;
 import org.example.finalprojectphasetwo.entity.enumeration.SpecialistStatus;
 import org.example.finalprojectphasetwo.entity.users.Specialist;
 import org.example.finalprojectphasetwo.exception.InvalidInputException;
@@ -79,6 +80,7 @@ public class SpecialistServiceImpl
         specialist.setStar(0);
         specialist.setActive(true);
         specialist.setWallet(wallet);
+        specialist.setRole(Role.SPECIALIST);
         userRepository.save(specialist);
     }
 

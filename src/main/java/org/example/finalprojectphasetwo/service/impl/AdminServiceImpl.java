@@ -6,6 +6,7 @@ import jakarta.validation.Validator;
 import org.example.finalprojectphasetwo.dto.request.AddAndDeleteSpecialistFromSubServiceRequest;
 import org.example.finalprojectphasetwo.dto.request.EditPriceAndDescriptionRequest;
 import org.example.finalprojectphasetwo.dto.request.SearchForUsers;
+import org.example.finalprojectphasetwo.entity.enumeration.Role;
 import org.example.finalprojectphasetwo.entity.enumeration.SpecialistStatus;
 import org.example.finalprojectphasetwo.entity.services.MainService;
 import org.example.finalprojectphasetwo.entity.services.SubService;
@@ -58,6 +59,7 @@ public class AdminServiceImpl
                             .password("admin123")
                             .hasPermission(true)
                             .isActive(true)
+                            .role(Role.ADMIN)
                             .build()
             );
         }

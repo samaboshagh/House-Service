@@ -9,6 +9,7 @@ import org.example.finalprojectphasetwo.entity.Order;
 import org.example.finalprojectphasetwo.entity.Suggestion;
 import org.example.finalprojectphasetwo.entity.Wallet;
 import org.example.finalprojectphasetwo.entity.enumeration.OrderStatus;
+import org.example.finalprojectphasetwo.entity.enumeration.Role;
 import org.example.finalprojectphasetwo.entity.services.MainService;
 import org.example.finalprojectphasetwo.entity.services.SubService;
 import org.example.finalprojectphasetwo.entity.users.Customer;
@@ -77,6 +78,7 @@ public class CustomerServiceImpl
         checkUsernameAndEmailForRegistration(customer);
         customer.setActive(true);
         customer.setWallet(wallet);
+        customer.setRole(Role.CUSTOMER);
         userRepository.save(customer);
     }
 
