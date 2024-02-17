@@ -11,12 +11,12 @@ import lombok.experimental.FieldDefaults;
 @Getter
 public class EditPriceAndDescriptionRequest {
 
-    @NotBlank
+    @NotBlank(message = "SUB SERVICE TITLE IS REQUIRED")
     String subServiceTitle;
 
     Double basePrice;
 
-    @NotBlank
+    @NotBlank(message = "DESCRIPTION IS REQUIRED")
     String description;
 
 }

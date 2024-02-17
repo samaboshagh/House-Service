@@ -2,15 +2,16 @@ package org.example.finalprojectphasetwo.service;
 
 import org.example.finalprojectphasetwo.entity.Order;
 import org.example.finalprojectphasetwo.entity.enumeration.OrderStatus;
+import org.example.finalprojectphasetwo.entity.services.SubService;
+import org.example.finalprojectphasetwo.entity.users.Customer;
 import org.example.finalprojectphasetwo.entity.users.Specialist;
-import org.example.finalprojectphasetwo.dto.request.OrderDto;
 
 import java.util.List;
 
 @SuppressWarnings("unused")
 public interface OrderService {
 
-    void addOrder(OrderDto orderDto);
+    void addOrder(SubService subService, Customer customer, Order order);
 
     List<Order> findAll();
 

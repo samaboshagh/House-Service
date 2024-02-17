@@ -8,7 +8,6 @@ import org.example.finalprojectphasetwo.entity.enumeration.SpecialistStatus;
 import org.example.finalprojectphasetwo.entity.services.MainService;
 import org.example.finalprojectphasetwo.entity.services.SubService;
 import org.example.finalprojectphasetwo.entity.users.Admin;
-import org.example.finalprojectphasetwo.dto.request.SubServiceDto;
 import org.example.finalprojectphasetwo.entity.users.Specialist;
 import org.example.finalprojectphasetwo.entity.users.User;
 
@@ -23,7 +22,7 @@ public interface AdminService extends UserService<Admin> {
 
     List<MainService> showAllMainServices();
 
-    void addSubServiceByAdmin(SubServiceDto subServiceDto);
+    void addSubServiceByAdmin(SubService subService, String mainServiceTitle);
 
     List<SubService> showAllSubServices();
 

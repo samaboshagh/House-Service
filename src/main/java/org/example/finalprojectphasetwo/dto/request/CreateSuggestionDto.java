@@ -19,7 +19,7 @@ public class CreateSuggestionDto {
 
     Integer workDuration;
 
-    @NotBlank
+    @NotBlank(message = "SPECIALIST USERNAME IS REQUIRED")
     String specialistUsername;
 
     Integer orderId;

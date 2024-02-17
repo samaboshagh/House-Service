@@ -14,19 +14,20 @@ import java.time.LocalDate;
 @Getter
 public class OrderDto {
 
+    @NotBlank(message = "DESCRIPTION IS REQUIRED")
     String description;
 
     Double suggestedPrice;
 
     LocalDate timeOfOrder;
 
-    @NotBlank
+    @NotBlank(message = "ADDRESS IS REQUIRED")
     String address;
 
-    @NotBlank
+    @NotBlank(message = "CUSTOMER USERNAME IS REQUIRED")
     String customerUsername;
 
-    @NotBlank
+    @NotBlank(message = "SUB SERVICE TITLE IS REQUIRED")
     String subServiceTitle;
 
 }

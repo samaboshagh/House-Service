@@ -2,11 +2,13 @@ package org.example.finalprojectphasetwo.service.impl;
 
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
+import org.example.finalprojectphasetwo.dto.request.ChangePasswordRequest;
 import org.example.finalprojectphasetwo.dto.request.SearchForUsers;
 import org.example.finalprojectphasetwo.entity.users.User;
 import org.example.finalprojectphasetwo.exception.DuplicateException;
 import org.example.finalprojectphasetwo.exception.InvalidInputException;
 import org.example.finalprojectphasetwo.exception.NotFoundException;
+import org.example.finalprojectphasetwo.exception.NotMatchPasswordException;
 import org.example.finalprojectphasetwo.repository.UserRepository;
 import org.example.finalprojectphasetwo.service.UserService;
 import org.springframework.data.jpa.domain.Specification;
@@ -31,15 +33,10 @@ public class UserServiceImpl<T extends User, R extends UserRepository<T>>
 
     @Transactional
     @Override
-    public void changePassword(T user, String password) {
-        if ((!password.matches("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8}$")))
-            throw new InvalidInputException("PASSWORD IS NOT IN RIGHT FORMAT !");
-        if (user != null && !password.isBlank()) {
-            if (!Objects.equals(user.getPassword(), password)) {
-                user.setPassword(password);
-                userRepository.save(user);
-            } else throw new InvalidInputException("SAME PASSWORD ! ");
-        } else throw new NotFoundException("USERNAME OR PASSWORD IS NULL !");
+    public void changePassword(T user, ChangePasswordRequest password) {
+        validPasswordCheck(user, password);
+        user.setPassword(password.getPassword());
+        userRepository.save(user);
     }
 
     public void checkUsernameAndEmailForRegistration(T registration) {
@@ -94,5 +91,15 @@ public class UserServiceImpl<T extends User, R extends UserRepository<T>>
             }
             return predicate;
         };
+    }
+
+    private static <T extends User> void validPasswordCheck(T user, ChangePasswordRequest password) {
+        if (user == null && password == null)
+            throw new NotFoundException("USERNAME OR PASSWORD IS NULL !");
+        assert user != null;
+        if (Objects.equals(user.getPassword(), password.getPassword()))
+            throw new InvalidInputException("SAME PASSWORD ! ");
+        if (!password.getPassword().equals(password.getConfirmPassword()))
+            throw new NotMatchPasswordException("NOT MATCH PASSWORD");
     }
 }

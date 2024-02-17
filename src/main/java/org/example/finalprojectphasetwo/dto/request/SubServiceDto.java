@@ -12,14 +12,15 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 public class SubServiceDto {
 
-    @NotBlank
+    @NotBlank(message = "SUB SERVICE TITLE IS REQUIRED")
     String subServiceTitle;
 
     Double basePrice;
 
+    @NotBlank(message = "DESCRIPTION IS REQUIRED")
     String description;
 
-    @NotBlank
+    @NotBlank(message = "MAIN SERVICE NAME IS REQUIRED")
     String mainServiceName;
 
 }

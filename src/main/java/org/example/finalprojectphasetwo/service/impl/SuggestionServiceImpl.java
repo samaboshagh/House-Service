@@ -55,6 +55,8 @@ public class SuggestionServiceImpl implements SuggestionService {
         Specialist specialist = specialistService.findByUsername(dto.getSpecialistUsername());
         addSuggestionValidation(dto, specialist);
         Order order = orderService.findById(dto.getOrderId());
+        if (!checkPrice(order, dto))
+            throw new InvalidInputException("SUGGESTED PRICE IS LESS THAN BASE PRICE");
         Suggestion suggestion = Suggestion
                 .builder()
                 .suggestionCreationDate(LocalDate.now())
@@ -66,12 +68,10 @@ public class SuggestionServiceImpl implements SuggestionService {
                 .build();
         List<Suggestion> suggestions = new ArrayList<>();
         suggestions.add(suggestion);
-        if (checkPrice(order, dto)) {
-            suggestionRepository.save(suggestion);
-            order.setSuggestions(suggestions);
-            order.setStatus(OrderStatus.WAITING_SPECIALIST_SELECTION);
-            orderService.save(order);
-        } else throw new InvalidInputException("SUGGESTED PRICE IS LESS THAN BASE PRICE");
+        suggestionRepository.save(suggestion);
+        order.setSuggestions(suggestions);
+        order.setStatus(OrderStatus.WAITING_SPECIALIST_SELECTION);
+        orderService.save(order);
     }
 
     @Override

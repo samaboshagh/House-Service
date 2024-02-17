@@ -3,6 +3,7 @@ package org.example.finalprojectphasetwo.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.example.finalprojectphasetwo.entity.Comment;
 import org.example.finalprojectphasetwo.entity.Order;
+import org.example.finalprojectphasetwo.entity.Suggestion;
 import org.example.finalprojectphasetwo.entity.users.Specialist;
 import org.example.finalprojectphasetwo.exception.DuplicateException;
 import org.example.finalprojectphasetwo.repository.CommentRepository;
@@ -20,9 +21,11 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
 
     @Override
-    public void addCommentToOrder(Comment comment, Order order) {
-        if (existsByOrder(order)) throw new DuplicateException("YOU CAN NOT HAVE SECOND COMMENT FOR SAME ORDER !");
-        comment.setOrder(order);
+    public void addCommentToOrder(Comment comment, Suggestion suggestion) {
+        if (existsByOrder(suggestion.getOrder()))
+            throw new DuplicateException("YOU CAN NOT HAVE SECOND COMMENT FOR SAME ORDER !");
+        comment.setOrder(suggestion.getOrder());
+        comment.setSpecialist(suggestion.getSpecialist());
         commentRepository.save(comment);
     }
 
@@ -35,4 +38,5 @@ public class CommentServiceImpl implements CommentService {
     public Boolean existsByOrder(Order order) {
         return commentRepository.existsByOrder(order);
     }
+
 }

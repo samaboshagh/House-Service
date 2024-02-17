@@ -1,8 +1,6 @@
 package org.example.finalprojectphasetwo.service.impl;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validator;
-import org.example.finalprojectphasetwo.dto.request.OrderDto;
+import org.example.finalprojectphasetwo.dto.request.ChangePasswordRequest;
 import org.example.finalprojectphasetwo.dto.request.PayWithCardDto;
 import org.example.finalprojectphasetwo.entity.Comment;
 import org.example.finalprojectphasetwo.entity.Order;
@@ -13,17 +11,18 @@ import org.example.finalprojectphasetwo.entity.enumeration.Role;
 import org.example.finalprojectphasetwo.entity.services.MainService;
 import org.example.finalprojectphasetwo.entity.services.SubService;
 import org.example.finalprojectphasetwo.entity.users.Customer;
-import org.example.finalprojectphasetwo.exception.DuplicateException;
+import org.example.finalprojectphasetwo.entity.users.Specialist;
 import org.example.finalprojectphasetwo.exception.InvalidInputException;
 import org.example.finalprojectphasetwo.exception.NotFoundException;
+import org.example.finalprojectphasetwo.exception.WrongTimeException;
 import org.example.finalprojectphasetwo.repository.CustomerRepository;
 import org.example.finalprojectphasetwo.service.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Set;
 
 @Transactional
 @Service
@@ -39,9 +38,8 @@ public class CustomerServiceImpl
     private final WalletService walletService;
     private final CommentService commentService;
     private final PaymentService paymentService;
-    private final Validator validator;
 
-    public CustomerServiceImpl(CustomerRepository userRepository, SuggestionService suggestionService, SubServiceService subServiceService, MainServiceService mainServiceService, OrderService orderService, SpecialistService specialistService, WalletService walletService, CommentService commentService, PaymentService paymentService, Validator validator) {
+    public CustomerServiceImpl(CustomerRepository userRepository, SuggestionService suggestionService, SubServiceService subServiceService, MainServiceService mainServiceService, OrderService orderService, SpecialistService specialistService, WalletService walletService, CommentService commentService, PaymentService paymentService) {
         super(userRepository);
         this.suggestionService = suggestionService;
         this.subServiceService = subServiceService;
@@ -51,7 +49,6 @@ public class CustomerServiceImpl
         this.walletService = walletService;
         this.commentService = commentService;
         this.paymentService = paymentService;
-        this.validator = validator;
     }
 
     @Override
@@ -83,30 +80,31 @@ public class CustomerServiceImpl
     }
 
     @Override
-    public void changePassword(String username, String password) {
-        if (username == null && password == null)
-            throw new NotFoundException("USERNAME OR PASSWORD CANNOT BE NULL");
-        Customer customer = findByUsername(username);
+    public void changePassword(ChangePasswordRequest password) {
+        Customer customer = findByUsername(password.getUsername());
         changePassword(customer, password);
     }
 
     @Override
-    public void addOrder(OrderDto orderDto) {
-        orderService.addOrder(orderDto);
+    public void addOrder(Double suggestedPrice, String customerUsername, String subServiceTitle, LocalDate timeOfOrder, Order order) {
+        timeValidation(timeOfOrder);
+        Customer customer = findByUsername(customerUsername);
+        SubService subService = subServiceService.findBySubServiceTitle(subServiceTitle);
+        if (!checkPrice(subService, suggestedPrice))
+            throw new InvalidInputException("BASE PRICE IS MORE THAN SUGGESTED PRICE ! ");
+        orderService.addOrder(subService, customer, order);
     }
 
     @Override
     public List<Suggestion> findSuggestionByCustomerAndOrderBySpecialistScore(String customerUsername) {
-        if (customerUsername == null)
-            throw new NotFoundException("CUSTOMER USERNAME CAN NOT BE NULL");
+        findSuggestionValidation(customerUsername);
         Customer customer = findByUsername(customerUsername);
         return suggestionService.findSuggestionsByCustomerAndOrderBySpecialistScore(customer);
     }
 
     @Override
     public List<Suggestion> findSuggestionsByCustomerAndOrderBySuggestionPrice(String customerUsername) {
-        if (customerUsername == null)
-            throw new NotFoundException("CUSTOMER USERNAME CAN NOT BE NULL");
+        findSuggestionValidation(customerUsername);
         Customer customer = findByUsername(customerUsername);
         return suggestionService.findSuggestionsByCustomerAndOrderBySuggestionPrice(customer);
     }
@@ -124,10 +122,10 @@ public class CustomerServiceImpl
         orderAndSuggestionValidation(suggestionId);
         Suggestion suggestion = suggestionService.findById(suggestionId);
         Order order = suggestion.getOrder();
-        if (changeOrderStatusToStartedValidation(order, suggestion) &&
-            order.getStatus().equals(OrderStatus.WAITING_FOR_THE_SPECIALIST_TO_COME_TO_YOUR_PLACE)) {
-            orderService.changeOrderStatus(order, OrderStatus.STARTED);
-        } else throw new NotFoundException("INVALID INFORMATION !");
+        if (changeOrderStatusValidation(order, suggestion) &&
+            order.getStatus().equals(OrderStatus.WAITING_FOR_THE_SPECIALIST_TO_COME_TO_YOUR_PLACE))
+            throw new InvalidInputException("INVALID INFORMATION !");
+        orderService.changeOrderStatus(order, OrderStatus.STARTED);
     }
 
 
@@ -136,10 +134,10 @@ public class CustomerServiceImpl
         orderAndSuggestionValidation(suggestionId);
         Suggestion suggestion = suggestionService.findById(suggestionId);
         Order order = suggestion.getOrder();
-        if (changeOrderStatusToStartedValidation(order, suggestion) &&
-            order.getStatus().equals(OrderStatus.STARTED)) {
-            orderService.changeOrderStatus(order, OrderStatus.DONE);
-        } else throw new NotFoundException("INVALID INFORMATION !");
+        if (changeOrderStatusValidation(order, suggestion) &&
+            order.getStatus().equals(OrderStatus.STARTED))
+            throw new InvalidInputException("INVALID INFORMATION !");
+        orderService.changeOrderStatus(order, OrderStatus.DONE);
         order.setOrderEndTime(ZonedDateTime.now());
         orderService.save(order);
     }
@@ -155,10 +153,6 @@ public class CustomerServiceImpl
 
     @Override
     public void payWithCard(PayWithCardDto dto) {
-        Set<ConstraintViolation<PayWithCardDto>> violations = validator.validate(dto);
-        if (!violations.isEmpty()) {
-            throw new InvalidInputException("INVALID INFO");
-        }
         Order order = orderService.findById(dto.getOrderId());
         Suggestion suggestion = suggestionService.findById(dto.getSuggestionId());
         paymentService.payWithCard(dto, suggestion);
@@ -166,20 +160,25 @@ public class CustomerServiceImpl
     }
 
     @Override
-    public void addComment(Comment comment, Integer orderId) {
-        if (comment == null && orderId == null)
+    @Transactional
+    public void addComment(Comment comment, Integer suggestionId) {
+        if (comment == null && suggestionId == null)
             throw new NotFoundException("ORDER ID CAN NOT BE NULL");
-        Order order = orderService.findById(orderId);
-        commentService.addCommentToOrder(comment, order);
+        Suggestion suggestion = suggestionService.findById(suggestionId);
+        Specialist specialist = suggestion.getSpecialist();
+        assert comment != null;
+        specialist.setStar(comment.getScore());
+        specialistService.save(specialist);
+        commentService.addCommentToOrder(comment, suggestion);
     }
 
-    private static boolean changeOrderStatusToStartedValidation(Order order, Suggestion suggestion) {
+    private static boolean changeOrderStatusValidation(Order order, Suggestion suggestion) {
         if (order != null && suggestion != null) {
             if (suggestion.getOrder().equals(order)) {
-                return suggestion.getSuggestedStartDate().isAfter(ZonedDateTime.now());
+                return !suggestion.getSuggestedStartDate().isAfter(ZonedDateTime.now());
             }
         }
-        return false;
+        return true;
     }
 
     private void checkIfSpecialistHasDelay(Suggestion suggestion) {
@@ -198,4 +197,22 @@ public class CustomerServiceImpl
         if (suggestionId == null)
             throw new NotFoundException("SUGGESTION ID CAN NOT BE NULL !");
     }
+
+    private static void findSuggestionValidation(String customerUsername) {
+        if (customerUsername == null)
+            throw new NotFoundException("CUSTOMER USERNAME CAN NOT BE NULL");
+    }
+
+    private static void timeValidation(LocalDate timeOfOrder) {
+        if (timeOfOrder == null)
+            throw new InvalidInputException("TIME OF ORDER CANNOT BE NULL");
+        if (timeOfOrder.isBefore(LocalDate.now()))
+            throw new WrongTimeException("INVALID DATE !");
+    }
+
+    private boolean checkPrice(SubService subService, Double suggestedPrice) {
+        if (suggestedPrice == null) throw new NotFoundException("SUGGESTED PRICE IS NULL !");
+        return subService.getBasePrice() < suggestedPrice;
+    }
+
 }

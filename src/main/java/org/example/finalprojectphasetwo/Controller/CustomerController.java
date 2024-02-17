@@ -1,50 +1,40 @@
 package org.example.finalprojectphasetwo.Controller;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validator;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.example.finalprojectphasetwo.dto.request.AddCommentDto;
-import org.example.finalprojectphasetwo.dto.request.OrderDto;
-import org.example.finalprojectphasetwo.dto.request.PayWithCardDto;
-import org.example.finalprojectphasetwo.dto.request.UserSingUpDto;
+import org.example.finalprojectphasetwo.dto.request.*;
 import org.example.finalprojectphasetwo.dto.response.AddCommentResponse;
 import org.example.finalprojectphasetwo.dto.response.CreateCustomerResponse;
 import org.example.finalprojectphasetwo.entity.Comment;
+import org.example.finalprojectphasetwo.entity.Order;
 import org.example.finalprojectphasetwo.entity.Suggestion;
 import org.example.finalprojectphasetwo.entity.services.MainService;
 import org.example.finalprojectphasetwo.entity.services.SubService;
 import org.example.finalprojectphasetwo.entity.users.Customer;
-import org.example.finalprojectphasetwo.exception.InvalidInputException;
 import org.example.finalprojectphasetwo.mapper.AddCommentMapper;
+import org.example.finalprojectphasetwo.mapper.AddOrderMapper;
 import org.example.finalprojectphasetwo.mapper.CustomerMapper;
 import org.example.finalprojectphasetwo.service.CustomerService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @CrossOrigin
 @RequestMapping("/customer")
 @AllArgsConstructor
+@Validated
 public class CustomerController {
 
     private final CustomerService customerService;
 
-    private final Validator validator;
 
     @PostMapping("/customer_sing_up")
-    public ResponseEntity<CreateCustomerResponse> customerSingUp(@RequestBody UserSingUpDto dto, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return ResponseEntity.badRequest().build();
-        }
-        Set<ConstraintViolation<UserSingUpDto>> violations = validator.validate(dto);
-        if (!violations.isEmpty()) {
-            throw new InvalidInputException("INVALID INPUT VALUE : " + violations);
-        }
+    public ResponseEntity<CreateCustomerResponse> customerSingUp(@RequestBody @Valid UserSingUpDto dto) {
         Customer customer = CustomerMapper.INSTANCE.convertToDto(dto);
         customerService.customerSingUp(customer);
         CreateCustomerResponse createCustomerResponse = CustomerMapper.INSTANCE.dtoToCustomer(customer);
@@ -52,8 +42,8 @@ public class CustomerController {
     }
 
     @PutMapping("/change_password")
-    public ResponseEntity<String> changePassword(@RequestParam String username, @RequestParam String password) {
-        customerService.changePassword(username, password);
+    public ResponseEntity<String> changePassword(@RequestBody @Valid ChangePasswordRequest passwordRequest) {
+        customerService.changePassword(passwordRequest);
         return new ResponseEntity<>("PASSWORD CHANGED SUCCESSFULLY", HttpStatus.OK);
     }
 
@@ -68,11 +58,13 @@ public class CustomerController {
     }
 
     @PostMapping("/add_order")
-    public ResponseEntity<String> addOrder(@RequestBody OrderDto orderDto, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return ResponseEntity.badRequest().build();
-        }
-        customerService.addOrder(orderDto);
+    public ResponseEntity<String> addOrder(@RequestBody @Valid OrderDto orderDto) {
+        Order order = AddOrderMapper.INSTANCE.convertToDto(orderDto);
+        Double suggestedPrice = orderDto.getSuggestedPrice();
+        String customerUsername = orderDto.getCustomerUsername();
+        String subServiceTitle = orderDto.getSubServiceTitle();
+        LocalDate timeOfOrder = orderDto.getTimeOfOrder();
+        customerService.addOrder(suggestedPrice, customerUsername, subServiceTitle, timeOfOrder, order);
         return new ResponseEntity<>("ORDER SUCCESSFULLY PLACED", HttpStatus.OK);
     }
 
@@ -113,25 +105,14 @@ public class CustomerController {
     @CrossOrigin
     @PostMapping("/pay_with_card")
     public ResponseEntity<String> payWithCard(@RequestBody PayWithCardDto payWithCardDto) {
-//        if (bindingResult.hasErrors()) {
-//            return ResponseEntity.badRequest().build();
-//        }
-//        customerService.payWithCard(payWithCardDto);
         return new ResponseEntity<>("SUCCESSFULLY PAID", HttpStatus.OK);
     }
 
     @PostMapping("/add_comment")
-    public ResponseEntity<AddCommentResponse> addComment(@RequestBody AddCommentDto addCommentDto, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return ResponseEntity.badRequest().build();
-        }
-        Set<ConstraintViolation<AddCommentDto>> violations = validator.validate(addCommentDto);
-        if (!violations.isEmpty()) {
-            throw new InvalidInputException("INVALID INPUT VALUE : " + violations);
-        }
+    public ResponseEntity<AddCommentResponse> addComment(@RequestBody @Valid AddCommentDto addCommentDto) {
         Comment comment = AddCommentMapper.INSTANCE.convertToDto(addCommentDto);
-        Integer orderId = addCommentDto.getOrderId();
-        customerService.addComment(comment, orderId);
+        Integer suggestionId = addCommentDto.getSuggestionId();
+        customerService.addComment(comment, suggestionId);
         AddCommentResponse addCommentResponse = AddCommentMapper.INSTANCE.dtoToCustomer(comment);
         return new ResponseEntity<>(addCommentResponse, HttpStatus.OK);
     }

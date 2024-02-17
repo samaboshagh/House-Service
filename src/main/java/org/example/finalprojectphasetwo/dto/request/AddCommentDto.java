@@ -1,6 +1,5 @@
 package org.example.finalprojectphasetwo.dto.request;
 
-import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -15,6 +14,6 @@ public class AddCommentDto {
 
     Integer score;
 
-    Integer orderId;
+    Integer suggestionId;
 
 }

@@ -1,5 +1,6 @@
 package org.example.finalprojectphasetwo.service;
 
+import org.example.finalprojectphasetwo.dto.request.ChangePasswordRequest;
 import org.example.finalprojectphasetwo.entity.Comment;
 import org.example.finalprojectphasetwo.entity.Order;
 import org.example.finalprojectphasetwo.entity.Suggestion;
@@ -22,7 +23,7 @@ public interface SpecialistService {
 
     void specialistSingUp(Specialist specialist, String path) throws IOException;
 
-    void changePassword(String username, String password);
+    void changePassword(ChangePasswordRequest changePasswordRequest);
 
     String getSpecialistProfileImageFromDatabase(Specialist specialist) throws IOException;
 

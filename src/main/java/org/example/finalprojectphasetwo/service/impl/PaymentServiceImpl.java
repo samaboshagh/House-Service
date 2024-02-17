@@ -1,5 +1,8 @@
 package org.example.finalprojectphasetwo.service.impl;
 
+import com.google.code.kaptcha.impl.DefaultKaptcha;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.example.finalprojectphasetwo.dto.request.PayWithCardDto;
 import org.example.finalprojectphasetwo.entity.Order;
 import org.example.finalprojectphasetwo.entity.Suggestion;
@@ -10,18 +13,20 @@ import org.example.finalprojectphasetwo.service.SpecialistService;
 import org.example.finalprojectphasetwo.service.WalletService;
 import org.springframework.stereotype.Service;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
 @Service
+@RequiredArgsConstructor
 public class PaymentServiceImpl implements PaymentService {
 
     private final WalletService walletService;
     private final CardService cardService;
     private final SpecialistService specialistService;
+    private final DefaultKaptcha captchaProducer;
 
-    public PaymentServiceImpl(WalletService walletService, CardService cardService, SpecialistService specialistService) {
-        this.walletService = walletService;
-        this.cardService = cardService;
-        this.specialistService = specialistService;
-    }
 
     @Override
     public void payWithWalletCredit(Order order, Suggestion suggestion) {
@@ -36,9 +41,16 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public int generateCaptcha() {
-        // specific random number within the range 100000 and 999999
-        return 100000 + (int) (Math.random() * (999999 - 100000 + 1));
+    public void generateCaptcha(HttpServletResponse response) throws IOException {
+        response.setContentType("image/jpeg");
+        String capText = captchaProducer.createText();
+        BufferedImage bi = captchaProducer.createImage(capText);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        ImageIO.write(bi, "jpg", byteArrayOutputStream);
+        byte[] captchaBytes = byteArrayOutputStream.toByteArray();
+        response.getOutputStream().write(captchaBytes);
+        response.getOutputStream().flush();
+        response.getOutputStream().close();
     }
 
     @Override

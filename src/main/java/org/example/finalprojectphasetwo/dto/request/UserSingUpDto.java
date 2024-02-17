@@ -15,20 +15,23 @@ import java.time.LocalDate;
 public class UserSingUpDto {
 
     @Pattern(regexp = "^[A-Za-z]+$")
+    @NotBlank(message = "FIRSTNAME IS REQUIRED")
     String firstName;
 
     @Pattern(regexp = "^[A-Za-z]+$")
+    @NotBlank(message = "LASTNAME IS REQUIRED")
     String lastName;
 
-    @NonNull
+    @NotBlank(message = "EMAIL ADDRESS IS REQUIRED")
     @Email(message = "INVALID EMAIL")
     String emailAddress;
 
-    @NotBlank
+    @NotBlank(message = "USERNAME IS REQUIRED")
     String username;
 
     @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8}$",
-            message = "INVALID PASSWORD")
+            message = "YOUR PASSWORD MUST CONTAIN AT LEAST 1 LETTER, 1 NUMBER, AND BE 8 CHARACTERS LONG")
+    @NotBlank(message = "PASSWORD IS REQUIRED")
     String password;
 
     LocalDate creationDate = LocalDate.now();
@@ -36,4 +39,5 @@ public class UserSingUpDto {
     boolean isActive;
 
     boolean hasPermission;
+
 }

@@ -12,7 +12,7 @@ import lombok.experimental.FieldDefaults;
 @Getter
 public class MainServiceDto {
 
-    @NotBlank
+    @NotBlank(message = "TITLE IS REQUIRED")
     String title;
 
 }

@@ -1,8 +1,6 @@
 package org.example.finalprojectphasetwo.service.impl;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validator;
+import org.example.finalprojectphasetwo.dto.request.ChangePasswordRequest;
 import org.example.finalprojectphasetwo.entity.Comment;
 import org.example.finalprojectphasetwo.entity.Order;
 import org.example.finalprojectphasetwo.entity.Suggestion;
@@ -10,7 +8,6 @@ import org.example.finalprojectphasetwo.entity.Wallet;
 import org.example.finalprojectphasetwo.entity.enumeration.Role;
 import org.example.finalprojectphasetwo.entity.enumeration.SpecialistStatus;
 import org.example.finalprojectphasetwo.entity.users.Specialist;
-import org.example.finalprojectphasetwo.exception.InvalidInputException;
 import org.example.finalprojectphasetwo.exception.NotFoundException;
 import org.example.finalprojectphasetwo.exception.SpecialistQualificationException;
 import org.example.finalprojectphasetwo.exception.WrongTimeException;
@@ -27,7 +24,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Set;
 
 @Transactional(readOnly = true)
 @Service
@@ -40,15 +36,13 @@ public class SpecialistServiceImpl
     private final SuggestionService suggestionService;
     private final CommentService commentService;
     private final OrderService orderService;
-    private final Validator validator;
 
-    public SpecialistServiceImpl(SpecialistRepository userRepository, WalletService walletService, SuggestionService suggestionService, CommentService commentService, OrderService orderService, Validator validator) {
+    public SpecialistServiceImpl(SpecialistRepository userRepository, WalletService walletService, SuggestionService suggestionService, CommentService commentService, OrderService orderService) {
         super(userRepository);
         this.walletService = walletService;
         this.suggestionService = suggestionService;
         this.commentService = commentService;
         this.orderService = orderService;
-        this.validator = validator;
     }
 
 
@@ -86,10 +80,8 @@ public class SpecialistServiceImpl
 
     @Override
     @Transactional
-    public void changePassword(String username, String password) {
-        if (username.isBlank() && password.isBlank())
-            throw new NotFoundException("USERNAME OR PASSWORD CANNOT BE NULL");
-        Specialist specialist = findByUsername(username);
+    public void changePassword(ChangePasswordRequest password) {
+        Specialist specialist = findByUsername(password.getUsername());
         if (specialist.getSpecialistStatus().equals(SpecialistStatus.WARNING) ||
             specialist.getSpecialistStatus().equals(SpecialistStatus.NEW))
             throw new SpecialistQualificationException("SPECIALIST NOT QUALIFIED");
@@ -123,10 +115,6 @@ public class SpecialistServiceImpl
     @Transactional
     @Override
     public void addSuggestionToOrderBySpecialist(CreateSuggestionDto dto) {
-        Set<ConstraintViolation<CreateSuggestionDto>> violations = validator.validate(dto);
-        if (!violations.isEmpty()) {
-            throw new InvalidInputException("SPECIALIST USER NAME CON NOT BE NULL");
-        }
         if (dto.getSuggestedStartDate().isBefore(ZonedDateTime.now())) throw new WrongTimeException("NOT RIGHT TIME !");
         suggestionService.addSuggestion(dto);
     }
@@ -145,23 +133,9 @@ public class SpecialistServiceImpl
     @Transactional
     public void reducingScore(Specialist specialist) {
         if (userRepository.findByUsername(specialist.getUsername()).isPresent()) {
-
-            int star = specialist.getStar() - 1;
-            specialist.setStar(star);
+            specialist.setStar(specialist.getStar() - 1);
             userRepository.save(specialist);
         }
-    }
-
-    private void getAverageScore(Specialist specialist) {
-        int totalScore = 0;
-        int commentCount = 0;
-        for (Comment comment : specialist.getComments()) {
-            totalScore += comment.getScore();
-            commentCount++;
-        }
-        Integer averageScore = (commentCount > 0) ? totalScore / commentCount : 0;
-        specialist.setStar(averageScore);
-        userRepository.save(specialist);
     }
 
     @Override

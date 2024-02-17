@@ -35,23 +35,23 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     public void payWithWalletCredit(Order order, Suggestion suggestion) {
-        if (payWithWalletCreditValidation(order, suggestion)) {
-            if (order.getCustomer().getWallet().getCreditAmount() <= suggestion.getSuggestedPrice())
-                throw new InvalidInputException("YOU DONT HAVE ENOUGH CREDIT !");
-            Wallet wallet = order.getCustomer().getWallet();
-            wallet.setCreditAmount(
-                    order.getCustomer().getWallet().getCreditAmount() - suggestion.getSuggestedPrice()
-            );
-            repository.save(wallet);
-            order.setPaid(true);
-            orderService.save(order);
-            orderService.changeOrderStatus(order, OrderStatus.PAID);
-        } else throw new InvalidInputException("ALREADY PAID FOR THIS ORDER !");
+        payWithWalletCreditValidation(order, suggestion);
+        Wallet wallet = order.getCustomer().getWallet();
+        wallet.setCreditAmount(
+                order.getCustomer().getWallet().getCreditAmount() - suggestion.getSuggestedPrice()
+        );
+        repository.save(wallet);
+        order.setPaid(true);
+        orderService.save(order);
+        orderService.changeOrderStatus(order, OrderStatus.PAID);
     }
 
-    private Boolean payWithWalletCreditValidation(Order order, Suggestion suggestion) {
-        return order.getCustomer() != null
-               && suggestion.getOrder().equals(order)
-               && !order.isPaid();
+    private void payWithWalletCreditValidation(Order order, Suggestion suggestion) {
+        if (order.getCustomer() == null && !suggestion.getOrder().equals(order) && order.isPaid())
+            throw new InvalidInputException("ALREADY PAID FOR THIS ORDER !");
+
+        assert order.getCustomer() != null;
+        if (order.getCustomer().getWallet().getCreditAmount() <= suggestion.getSuggestedPrice())
+            throw new InvalidInputException("YOU DONT HAVE ENOUGH CREDIT !");
     }
 }

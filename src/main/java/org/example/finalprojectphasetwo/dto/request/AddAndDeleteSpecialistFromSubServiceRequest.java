@@ -11,10 +11,10 @@ import lombok.experimental.FieldDefaults;
 @Getter
 public class AddAndDeleteSpecialistFromSubServiceRequest {
 
-    @NotBlank
+    @NotBlank(message = "SUB SERVICE TITLE IS REQUIRED")
     String subServiceTitle;
 
-    @NotBlank
+    @NotBlank(message = "SPECIALIST USERNAME IS REQUIRED")
     String specialistUsername;
 
 }

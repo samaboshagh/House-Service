@@ -1,20 +1,22 @@
 package org.example.finalprojectphasetwo.service;
 
-import org.example.finalprojectphasetwo.dto.request.OrderDto;
+import org.example.finalprojectphasetwo.dto.request.ChangePasswordRequest;
 import org.example.finalprojectphasetwo.dto.request.PayWithCardDto;
 import org.example.finalprojectphasetwo.entity.Comment;
+import org.example.finalprojectphasetwo.entity.Order;
 import org.example.finalprojectphasetwo.entity.Suggestion;
 import org.example.finalprojectphasetwo.entity.services.MainService;
 import org.example.finalprojectphasetwo.entity.services.SubService;
 import org.example.finalprojectphasetwo.entity.users.Customer;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface CustomerService {
 
     void customerSingUp(Customer customer);
 
-    void changePassword(String username, String password);
+    void changePassword(ChangePasswordRequest password);
 
     Customer findByUsername(String username);
 
@@ -22,7 +24,7 @@ public interface CustomerService {
 
     List<SubService> showAllSubServices();
 
-    void addOrder(OrderDto orderDto);
+    void addOrder(Double suggestedPrice, String customerUsername, String subServiceTitle, LocalDate timeOfOrder, Order order);
 
     List<Suggestion> findSuggestionByCustomerAndOrderBySpecialistScore(String customerUsername);
 
@@ -38,5 +40,5 @@ public interface CustomerService {
 
     void payWithCard(PayWithCardDto payWithCardDto);
 
-    void addComment(Comment comment, Integer orderId);
+    void addComment(Comment comment, Integer suggestionId);
 }

@@ -1,5 +1,6 @@
 package org.example.finalprojectphasetwo.Controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.finalprojectphasetwo.dto.request.*;
 import org.example.finalprojectphasetwo.entity.enumeration.SpecialistStatus;
@@ -8,10 +9,10 @@ import org.example.finalprojectphasetwo.entity.services.SubService;
 import org.example.finalprojectphasetwo.entity.users.Specialist;
 import org.example.finalprojectphasetwo.entity.users.User;
 import org.example.finalprojectphasetwo.mapper.MainServiceMapper;
+import org.example.finalprojectphasetwo.mapper.SubServiceMapper;
 import org.example.finalprojectphasetwo.service.AdminService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,10 +27,7 @@ public class AdminController {
     private final AdminService adminService;
 
     @PostMapping("/add_main_service")
-    public ResponseEntity<MainServiceDto> addService(@RequestBody MainServiceDto mainServiceDto, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<MainServiceDto> addService(@RequestBody @Valid MainServiceDto mainServiceDto) {
         MainService mainService = MainServiceMapper.INSTANCE.convertToDto(mainServiceDto);
         adminService.saveServiceByAdmin(mainService);
         return new ResponseEntity<>(mainServiceDto, HttpStatus.CREATED);
@@ -41,11 +39,10 @@ public class AdminController {
     }
 
     @PostMapping("/add_sub_service")
-    public ResponseEntity<SubServiceDto> addSubService(@RequestBody SubServiceDto subServiceDto, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return ResponseEntity.badRequest().build();
-        }
-        adminService.addSubServiceByAdmin(subServiceDto);
+    public ResponseEntity<SubServiceDto> addSubService(@RequestBody @Valid SubServiceDto subServiceDto) {
+        String mainServiceName = subServiceDto.getMainServiceName();
+        SubService subService = SubServiceMapper.INSTANCE.convertToDto(subServiceDto);
+        adminService.addSubServiceByAdmin(subService, mainServiceName);
         return new ResponseEntity<>(subServiceDto, HttpStatus.CREATED);
     }
 
@@ -62,19 +59,13 @@ public class AdminController {
 
 
     @PutMapping("/add_specialist_to_sub_service")
-    public ResponseEntity<AddAndDeleteSpecialistFromSubServiceRequest> addSpecialistToSubService(@RequestBody AddAndDeleteSpecialistFromSubServiceRequest request, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<AddAndDeleteSpecialistFromSubServiceRequest> addSpecialistToSubService(@RequestBody @Valid AddAndDeleteSpecialistFromSubServiceRequest request) {
         adminService.addSpecialistToSubServiceByAdmin(request);
         return new ResponseEntity<>(request, HttpStatus.OK);
     }
 
     @DeleteMapping("/delete_specialist_to_sub_service")
-    public ResponseEntity<AddAndDeleteSpecialistFromSubServiceRequest> deleteSpecialistFromSubService(@RequestBody AddAndDeleteSpecialistFromSubServiceRequest request, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<AddAndDeleteSpecialistFromSubServiceRequest> deleteSpecialistFromSubService(@RequestBody @Valid AddAndDeleteSpecialistFromSubServiceRequest request) {
         adminService.deleteSpecialistFromSubServiceByAdmin(request);
         return new ResponseEntity<>(request, HttpStatus.NO_CONTENT);
     }
@@ -91,10 +82,7 @@ public class AdminController {
     }
 
     @PutMapping("edit_description_and_price")
-    public ResponseEntity<EditPriceAndDescriptionRequest> editDescriptionAndPrice(@RequestBody EditPriceAndDescriptionRequest request, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<EditPriceAndDescriptionRequest> editDescriptionAndPrice(@RequestBody @Valid EditPriceAndDescriptionRequest request) {
         adminService.editDescriptionAndPrice(request);
         return new ResponseEntity<>(request, HttpStatus.OK);
     }

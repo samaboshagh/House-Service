@@ -1,8 +1,11 @@
 package org.example.finalprojectphasetwo.service;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.example.finalprojectphasetwo.dto.request.PayWithCardDto;
 import org.example.finalprojectphasetwo.entity.Order;
 import org.example.finalprojectphasetwo.entity.Suggestion;
+
+import java.io.IOException;
 
 public interface PaymentService {
 
@@ -10,7 +13,7 @@ public interface PaymentService {
 
     void payWithCard(PayWithCardDto payWithCardDto, Suggestion suggestion);
 
-    int generateCaptcha();
+    void generateCaptcha(HttpServletResponse response) throws IOException;
 
     boolean validateCaptcha(int fixedRandomNumber, int userInput);
 
