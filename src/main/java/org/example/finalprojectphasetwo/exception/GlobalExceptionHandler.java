@@ -48,6 +48,11 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(ConfirmEmailException.class)
+    public ResponseEntity<String> wrongTimeExceptionHandler(ConfirmEmailException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(InvalidCaptchaException.class)
     public ResponseEntity<String> invalidCaptchaExceptionHandler(InvalidCaptchaException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);

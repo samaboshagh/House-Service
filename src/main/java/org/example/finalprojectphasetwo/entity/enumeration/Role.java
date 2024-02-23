@@ -2,8 +2,8 @@ package org.example.finalprojectphasetwo.entity.enumeration;
 
 public enum Role {
 
-    CUSTOMER,
-    SPECIALIST,
-    ADMIN
+    ROLE_CUSTOMER,
+    ROLE_SPECIALIST,
+    ROLE_ADMIN
 
 }

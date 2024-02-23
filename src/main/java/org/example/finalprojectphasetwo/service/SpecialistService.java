@@ -4,12 +4,13 @@ import org.example.finalprojectphasetwo.dto.request.ChangePasswordRequest;
 import org.example.finalprojectphasetwo.entity.Comment;
 import org.example.finalprojectphasetwo.entity.Order;
 import org.example.finalprojectphasetwo.entity.Suggestion;
+import org.example.finalprojectphasetwo.entity.enumeration.OrderStatus;
 import org.example.finalprojectphasetwo.entity.enumeration.SpecialistStatus;
 import org.example.finalprojectphasetwo.entity.users.Specialist;
-import org.example.finalprojectphasetwo.dto.request.CreateSuggestionDto;
 
 
 import java.io.IOException;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 
@@ -27,10 +28,9 @@ public interface SpecialistService {
 
     String getSpecialistProfileImageFromDatabase(Specialist specialist) throws IOException;
 
-    List<Order> findAllOrders();
+    List<Order> findAllOrders(String username);
 
-
-    void addSuggestionToOrderBySpecialist(CreateSuggestionDto dto);
+    void addSuggestionToOrderBySpecialist(Suggestion suggestion, ZonedDateTime suggestedStatDate, String specialistUsername, Double suggestedPrice, Integer orderId);
 
     void demotionOfTheSpecialist(Specialist specialist);
 
@@ -42,4 +42,9 @@ public interface SpecialistService {
 
     List<Specialist> findSpecialistBySpecialistStatus(SpecialistStatus status);
 
+    List<Order> findAllOrdersBySpecialist(String username, OrderStatus status);
+
+    Double seeCredit(String username);
+
+    void confirmEmail(String confirmationToken);
 }

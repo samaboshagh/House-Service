@@ -6,12 +6,9 @@ import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
 @Mapper(componentModel = "spring")
-public interface AddSugestionMapper {
+public interface AddSuggestionMapper {
 
-    AddSugestionMapper INSTANCE = Mappers.getMapper(AddSugestionMapper.class);
-
-    Suggestion convertToDto(CreateSuggestionDto suggestionDto);
-
+    AddSuggestionMapper INSTANCE = Mappers.getMapper(AddSuggestionMapper.class);
+    Suggestion convertToDto(CreateSuggestionDto createSuggestionDto);
     CreateSuggestionDto dtoToCustomer(Suggestion suggestion);
-
 }

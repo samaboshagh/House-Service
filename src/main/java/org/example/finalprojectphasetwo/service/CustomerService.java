@@ -5,16 +5,18 @@ import org.example.finalprojectphasetwo.dto.request.PayWithCardDto;
 import org.example.finalprojectphasetwo.entity.Comment;
 import org.example.finalprojectphasetwo.entity.Order;
 import org.example.finalprojectphasetwo.entity.Suggestion;
+import org.example.finalprojectphasetwo.entity.enumeration.OrderStatus;
 import org.example.finalprojectphasetwo.entity.services.MainService;
 import org.example.finalprojectphasetwo.entity.services.SubService;
 import org.example.finalprojectphasetwo.entity.users.Customer;
+import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
 import java.util.List;
 
 public interface CustomerService {
 
-    void customerSingUp(Customer customer);
+    Customer customerSingUp(Customer customer);
 
     void changePassword(ChangePasswordRequest password);
 
@@ -41,4 +43,10 @@ public interface CustomerService {
     void payWithCard(PayWithCardDto payWithCardDto);
 
     void addComment(Comment comment, Integer suggestionId);
+
+    List<Order> findAllOrdersByCustomer(String username, OrderStatus status);
+
+    Double seeCredit(String username);
+
+    void increaseCredit(Double amount, String username);
 }

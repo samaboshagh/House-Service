@@ -2,6 +2,7 @@ package org.example.finalprojectphasetwo.dto.request;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.example.finalprojectphasetwo.entity.enumeration.OrderStatus;
 
 import java.time.LocalDate;
 
@@ -9,17 +10,17 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@ToString
 @Getter
-public class PayWithCardDto {
+public class OrderHistoryDto {
 
-    String cardNumber;
+    LocalDate startDate;
 
-    Integer cvv2;
+    LocalDate endDate;
 
-    LocalDate expirationDate;
+    OrderStatus status;
 
-    Integer orderId;
+    String mainServiceTitle;
 
-    Integer suggestionId;
-
+    String subServiceTitle;
 }

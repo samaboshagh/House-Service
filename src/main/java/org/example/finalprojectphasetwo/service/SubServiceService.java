@@ -18,4 +18,6 @@ public interface SubServiceService {
 
     SubService findBySubServiceTitle(String serviceTitle);
 
+    List<SubService> historyOfSubServicesForCurrentUser(String username);
+
 }

@@ -10,6 +10,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
+@Setter
 public class ChangePasswordRequest {
 
     @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8}$",
@@ -21,8 +22,5 @@ public class ChangePasswordRequest {
             message = "YOUR PASSWORD MUST CONTAIN AT LEAST 1 LETTER, 1 NUMBER, AND BE 8 CHARACTERS LONG")
     @NotBlank(message = "CONFIRM PASSWORD IS REQUIRED")
     String confirmPassword;
-
-    @NotBlank(message = "USERNAME IS REQUIRED")
-    String username;
 
 }

@@ -5,15 +5,19 @@ import org.example.finalprojectphasetwo.entity.Comment;
 import org.example.finalprojectphasetwo.entity.Order;
 import org.example.finalprojectphasetwo.entity.Suggestion;
 import org.example.finalprojectphasetwo.entity.Wallet;
+import org.example.finalprojectphasetwo.entity.enumeration.OrderStatus;
 import org.example.finalprojectphasetwo.entity.enumeration.Role;
 import org.example.finalprojectphasetwo.entity.enumeration.SpecialistStatus;
 import org.example.finalprojectphasetwo.entity.users.Specialist;
+import org.example.finalprojectphasetwo.exception.InvalidInputException;
 import org.example.finalprojectphasetwo.exception.NotFoundException;
 import org.example.finalprojectphasetwo.exception.SpecialistQualificationException;
 import org.example.finalprojectphasetwo.exception.WrongTimeException;
+import org.example.finalprojectphasetwo.repository.ConfirmationTokenRepository;
 import org.example.finalprojectphasetwo.repository.SpecialistRepository;
 import org.example.finalprojectphasetwo.service.*;
-import org.example.finalprojectphasetwo.dto.request.CreateSuggestionDto;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,13 +40,22 @@ public class SpecialistServiceImpl
     private final SuggestionService suggestionService;
     private final CommentService commentService;
     private final OrderService orderService;
+    private final BCryptPasswordEncoder passwordEncoder;
 
-    public SpecialistServiceImpl(SpecialistRepository userRepository, WalletService walletService, SuggestionService suggestionService, CommentService commentService, OrderService orderService) {
-        super(userRepository);
+    public SpecialistServiceImpl(SpecialistRepository userRepository
+            , WalletService walletService
+            , SuggestionService suggestionService
+            , CommentService commentService
+            , OrderService orderService
+            , BCryptPasswordEncoder passwordEncoder
+            , EmailService emailService
+            , ConfirmationTokenRepository confirmationTokenRepository) {
+        super(userRepository, emailService, confirmationTokenRepository, passwordEncoder);
         this.walletService = walletService;
         this.suggestionService = suggestionService;
         this.commentService = commentService;
         this.orderService = orderService;
+        this.passwordEncoder = passwordEncoder;
     }
 
 
@@ -72,16 +85,20 @@ public class SpecialistServiceImpl
         specialist.setSpecialistStatus(SpecialistStatus.NEW);
         specialist.setProfileImage(setProfileImageToSpecialist(path));
         specialist.setStar(0);
+        specialist.setPassword(passwordEncoder.encode(specialist.getPassword()));
         specialist.setActive(true);
         specialist.setWallet(wallet);
-        specialist.setRole(Role.SPECIALIST);
+        specialist.setRole(Role.ROLE_SPECIALIST);
         userRepository.save(specialist);
+        sendEmail(specialist.getEmailAddress());
     }
 
     @Override
     @Transactional
     public void changePassword(ChangePasswordRequest password) {
-        Specialist specialist = findByUsername(password.getUsername());
+        Specialist specialist = findByUsername(
+                SecurityContextHolder.getContext().getAuthentication().getName()
+        );
         if (specialist.getSpecialistStatus().equals(SpecialistStatus.WARNING) ||
             specialist.getSpecialistStatus().equals(SpecialistStatus.NEW))
             throw new SpecialistQualificationException("SPECIALIST NOT QUALIFIED");
@@ -108,15 +125,21 @@ public class SpecialistServiceImpl
     }
 
     @Override
-    public List<Order> findAllOrders() {
-        return orderService.findAll();
+    public List<Order> findAllOrders(String username) {
+        Specialist specialist = findByUsername(username);
+        return orderService.findOrderWithWaitingStatusBySpecialist(specialist);
     }
 
     @Transactional
     @Override
-    public void addSuggestionToOrderBySpecialist(CreateSuggestionDto dto) {
-        if (dto.getSuggestedStartDate().isBefore(ZonedDateTime.now())) throw new WrongTimeException("NOT RIGHT TIME !");
-        suggestionService.addSuggestion(dto);
+    public void addSuggestionToOrderBySpecialist(Suggestion suggestion, ZonedDateTime suggestedStatDate,
+                                                 String specialistUsername, Double suggestedPrice, Integer orderId) {
+        Order order = orderService.findById(orderId);
+        Specialist specialist = findByUsername(specialistUsername);
+        addSuggestionValidation(order, specialist, suggestedStatDate);
+        if (!checkPrice(order, suggestion))
+            throw new InvalidInputException("SUGGESTED PRICE IS LESS THAN BASE PRICE");
+        suggestionService.addSuggestion(suggestion, order, specialist);
     }
 
     @Override
@@ -157,4 +180,33 @@ public class SpecialistServiceImpl
     public List<Specialist> findSpecialistBySpecialistStatus(SpecialistStatus status) {
         return userRepository.findSpecialistBySpecialistStatus(status);
     }
+
+    @Override
+    public List<Order> findAllOrdersBySpecialist(String username, OrderStatus status) {
+        if (status == null) throw new NotFoundException("STATUS IS REQUIRED");
+        Specialist specialist = findByUsername(username);
+        return orderService.findAllBySpecialist(specialist, status);
+    }
+
+    @Override
+    public Double seeCredit(String username) {
+        Specialist specialist = findByUsername(username);
+        return specialist.getWallet().getCreditAmount();
+    }
+
+    private static void addSuggestionValidation(Order order, Specialist specialist, ZonedDateTime suggestedStatDate) {
+        if (suggestedStatDate.isBefore(ZonedDateTime.now()))
+            throw new WrongTimeException("NOT RIGHT TIME !");
+        if (specialist.getSpecialistStatus().equals(SpecialistStatus.NEW) ||
+            specialist.getSpecialistStatus().equals(SpecialistStatus.WARNING))
+            throw new SpecialistQualificationException("SPECIALIST NOT QUALIFIED");
+        if (order == null)
+            throw new NotFoundException("ODER ID CANT BE NULL !");
+    }
+
+    private boolean checkPrice(Order order, Suggestion suggestion) {
+        if (order.getSubService().getBasePrice() == null) throw new NotFoundException("SUB SERVICE IS NULL !");
+        return suggestion.getSuggestedPrice() > order.getSubService().getBasePrice();
+    }
+
 }

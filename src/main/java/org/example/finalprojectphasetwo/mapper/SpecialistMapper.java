@@ -1,6 +1,6 @@
 package org.example.finalprojectphasetwo.mapper;
 
-import org.example.finalprojectphasetwo.dto.request.SpecialistSingUpDto;
+import org.example.finalprojectphasetwo.dto.request.SpecialistsSingUpDto;
 import org.example.finalprojectphasetwo.dto.response.CreateSpecialistResponse;
 import org.example.finalprojectphasetwo.entity.users.Specialist;
 import org.mapstruct.Mapper;
@@ -11,7 +11,7 @@ public interface SpecialistMapper {
 
     SpecialistMapper INSTANCE = Mappers.getMapper(SpecialistMapper.class);
 
-    Specialist convertToDto(SpecialistSingUpDto singUpDto);
+    Specialist convertToDto(SpecialistsSingUpDto singUpDto);
 
     CreateSpecialistResponse dtoToCustomer(Specialist specialist);
 

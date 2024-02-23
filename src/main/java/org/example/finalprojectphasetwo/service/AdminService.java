@@ -1,9 +1,9 @@
 package org.example.finalprojectphasetwo.service;
 
 
-import org.example.finalprojectphasetwo.dto.request.AddAndDeleteSpecialistFromSubServiceRequest;
-import org.example.finalprojectphasetwo.dto.request.EditPriceAndDescriptionRequest;
-import org.example.finalprojectphasetwo.dto.request.SearchForUsers;
+import org.example.finalprojectphasetwo.dto.request.*;
+import org.example.finalprojectphasetwo.entity.Order;
+import org.example.finalprojectphasetwo.entity.Suggestion;
 import org.example.finalprojectphasetwo.entity.enumeration.SpecialistStatus;
 import org.example.finalprojectphasetwo.entity.services.MainService;
 import org.example.finalprojectphasetwo.entity.services.SubService;
@@ -39,5 +39,13 @@ public interface AdminService extends UserService<Admin> {
     List<Specialist> findSpecialistBySpecialistStatus(SpecialistStatus status);
 
     List<User> searchUsersByAdmin(SearchForUsers search);
+
+    List<SubService> getHistoryOfSubServicesForUser(String username);
+
+    List<Order> getHistoryOfOrdersForUser(OrderHistoryDto dto);
+
+    List<Suggestion> getHistoryOfSuggestionForUser(String username);
+
+    ReportDto reportingFromUsers(String username);
 
 }

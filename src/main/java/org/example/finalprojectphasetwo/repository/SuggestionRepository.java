@@ -3,11 +3,12 @@ package org.example.finalprojectphasetwo.repository;
 import org.example.finalprojectphasetwo.entity.Suggestion;
 import org.example.finalprojectphasetwo.entity.users.Customer;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-public interface SuggestionRepository extends JpaRepository<Suggestion, Integer> {
+public interface SuggestionRepository extends JpaRepository<Suggestion, Integer>, JpaSpecificationExecutor<Suggestion> {
 
     @Query("FROM Suggestion s WHERE s.order.customer = :customer ORDER BY s.suggestedPrice ASC")
     List<Suggestion> findSuggestionsByCustomerAndOrderBySuggestionPrice(Customer customer);

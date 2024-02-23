@@ -10,16 +10,13 @@ import java.time.LocalDate;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
-public class PayWithCardDto {
+@Setter
+@ToString
+public class ReportDto {
 
-    String cardNumber;
+    LocalDate creationDate;
 
-    Integer cvv2;
+    Long requestOfOrders;
 
-    LocalDate expirationDate;
-
-    Integer orderId;
-
-    Integer suggestionId;
-
+    Long doneOrders;
 }

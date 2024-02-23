@@ -53,4 +53,18 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.MERGE)
     List<Suggestion> suggestions;
 
+    @Override
+    public String toString() {
+        return "Order{" +
+               "id=" + id +
+               ", description='" + description + '\'' +
+               ", suggestedPrice=" + suggestedPrice +
+               ", timeOfOrder=" + timeOfOrder +
+               ", address='" + address + '\'' +
+               ", OrderEndTime=" + OrderEndTime +
+               ", subService=" + subService +
+               ", status=" + status +
+               ", isPaid=" + isPaid +
+               '}';
+    }
 }

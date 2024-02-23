@@ -9,8 +9,13 @@ import lombok.experimental.FieldDefaults;
 import jakarta.persistence.*;
 import lombok.experimental.SuperBuilder;
 import org.example.finalprojectphasetwo.entity.enumeration.Role;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
+import java.util.Collection;
+import java.util.List;
 
 @Getter
 @Setter
@@ -21,7 +26,7 @@ import java.time.LocalDate;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Table(name = "users_table")
 @Entity
-public class User {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -31,10 +36,8 @@ public class User {
 
     String lastName;
 
-    @Column(unique = true)
     String emailAddress;
 
-    @Column(unique = true)
     String username;
 
     String password;
@@ -45,17 +48,35 @@ public class User {
     @Column(columnDefinition = "boolean default false")
     boolean hasPermission;
 
+    boolean isEnabled;
+
     LocalDate creationDate;
 
     @Enumerated(EnumType.STRING)
     Role role;
 
     @Override
-    public String toString() {
-        return "UserCaptcha{" +
-               "UserCaptcha id = " + getId() +
-               " firstName =' " + firstName + '\'' +
-               ", lastName =' " + lastName + '\'' +
-               '}';
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(role.name()));
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }

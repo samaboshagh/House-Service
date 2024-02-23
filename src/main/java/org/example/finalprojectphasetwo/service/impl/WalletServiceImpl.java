@@ -47,8 +47,11 @@ public class WalletServiceImpl implements WalletService {
     }
 
     private void payWithWalletCreditValidation(Order order, Suggestion suggestion) {
-        if (order.getCustomer() == null && !suggestion.getOrder().equals(order) && order.isPaid())
+        if (order.isPaid())
             throw new InvalidInputException("ALREADY PAID FOR THIS ORDER !");
+
+        if (order.getCustomer() == null && !suggestion.getOrder().equals(order))
+            throw new InvalidInputException("YOU CAN NOT PAY FOR THIS ORDER !");
 
         assert order.getCustomer() != null;
         if (order.getCustomer().getWallet().getCreditAmount() <= suggestion.getSuggestedPrice())

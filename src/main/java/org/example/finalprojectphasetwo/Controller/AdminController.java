@@ -3,6 +3,8 @@ package org.example.finalprojectphasetwo.Controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.finalprojectphasetwo.dto.request.*;
+import org.example.finalprojectphasetwo.entity.Order;
+import org.example.finalprojectphasetwo.entity.Suggestion;
 import org.example.finalprojectphasetwo.entity.enumeration.SpecialistStatus;
 import org.example.finalprojectphasetwo.entity.services.MainService;
 import org.example.finalprojectphasetwo.entity.services.SubService;
@@ -65,9 +67,9 @@ public class AdminController {
     }
 
     @DeleteMapping("/delete_specialist_to_sub_service")
-    public ResponseEntity<AddAndDeleteSpecialistFromSubServiceRequest> deleteSpecialistFromSubService(@RequestBody @Valid AddAndDeleteSpecialistFromSubServiceRequest request) {
+    public ResponseEntity<String> deleteSpecialistFromSubService(@RequestBody @Valid AddAndDeleteSpecialistFromSubServiceRequest request) {
         adminService.deleteSpecialistFromSubServiceByAdmin(request);
-        return new ResponseEntity<>(request, HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>("SPECIALIST SUCCESSFULLY DELETED ", HttpStatus.NO_CONTENT);
     }
 
     @GetMapping("/show_specialist_by_status")
@@ -76,9 +78,9 @@ public class AdminController {
     }
 
     @PutMapping("update_specialist_status")
-    public ResponseEntity<HttpStatus> setAcceptStatusForSpecialist(@RequestParam String username) {
+    public ResponseEntity<String > setAcceptStatusForSpecialist(@RequestParam String username) {
         adminService.setAcceptStatusForSpecialistByAdmin(username);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>("SPECIALIST STATUS SUCCESSFULLY CHANGED ",HttpStatus.OK);
     }
 
     @PutMapping("edit_description_and_price")
@@ -90,5 +92,25 @@ public class AdminController {
     @GetMapping("/search")
     public List<User> searchUsersByAdmin(@RequestBody SearchForUsers search) {
         return adminService.searchUsersByAdmin(search);
+    }
+
+    @GetMapping("/get_history_of_sub_services_for_user")
+    public List<SubService> getHistoryOfSubServicesForUser(@RequestParam String username) {
+        return adminService.getHistoryOfSubServicesForUser(username);
+    }
+
+    @GetMapping("/get_history_of_suggestion_for_user")
+    public List<Suggestion> getHistoryOfSuggestionForUser(@RequestParam String username){
+        return adminService.getHistoryOfSuggestionForUser(username);
+    }
+
+    @GetMapping("/get_history_of_orders_for_user")
+    public List<Order> getHistoryOfOrdersForUser(@RequestBody OrderHistoryDto dto) {
+        return adminService.getHistoryOfOrdersForUser(dto);
+    }
+
+    @GetMapping("/reporting_from_users")
+    public ReportDto reportingFromUsers(@RequestParam String username) {
+        return adminService.reportingFromUsers(username);
     }
 }

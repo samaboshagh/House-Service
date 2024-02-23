@@ -10,7 +10,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @ToString
 @Getter
-public class SpecialistSingUpDto extends UserSingUpDto {
+public class SpecialistsSingUpDto extends UserSingUpDto {
 
     @NotBlank(message = "SPECIALIZATION IS REQUIRED")
     String specialization;

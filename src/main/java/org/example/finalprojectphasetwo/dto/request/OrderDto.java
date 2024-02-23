@@ -24,9 +24,6 @@ public class OrderDto {
     @NotBlank(message = "ADDRESS IS REQUIRED")
     String address;
 
-    @NotBlank(message = "CUSTOMER USERNAME IS REQUIRED")
-    String customerUsername;
-
     @NotBlank(message = "SUB SERVICE TITLE IS REQUIRED")
     String subServiceTitle;
 

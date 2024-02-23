@@ -39,5 +39,4 @@ public class UserSingUpDto {
     boolean isActive;
 
     boolean hasPermission;
-
 }

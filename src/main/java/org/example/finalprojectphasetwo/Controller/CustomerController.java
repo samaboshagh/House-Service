@@ -8,6 +8,7 @@ import org.example.finalprojectphasetwo.dto.response.CreateCustomerResponse;
 import org.example.finalprojectphasetwo.entity.Comment;
 import org.example.finalprojectphasetwo.entity.Order;
 import org.example.finalprojectphasetwo.entity.Suggestion;
+import org.example.finalprojectphasetwo.entity.enumeration.OrderStatus;
 import org.example.finalprojectphasetwo.entity.services.MainService;
 import org.example.finalprojectphasetwo.entity.services.SubService;
 import org.example.finalprojectphasetwo.entity.users.Customer;
@@ -17,6 +18,7 @@ import org.example.finalprojectphasetwo.mapper.CustomerMapper;
 import org.example.finalprojectphasetwo.service.CustomerService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,8 +34,7 @@ public class CustomerController {
 
     private final CustomerService customerService;
 
-
-    @PostMapping("/customer_sing_up")
+    @PostMapping("/sing_up")
     public ResponseEntity<CreateCustomerResponse> customerSingUp(@RequestBody @Valid UserSingUpDto dto) {
         Customer customer = CustomerMapper.INSTANCE.convertToDto(dto);
         customerService.customerSingUp(customer);
@@ -61,20 +62,22 @@ public class CustomerController {
     public ResponseEntity<String> addOrder(@RequestBody @Valid OrderDto orderDto) {
         Order order = AddOrderMapper.INSTANCE.convertToDto(orderDto);
         Double suggestedPrice = orderDto.getSuggestedPrice();
-        String customerUsername = orderDto.getCustomerUsername();
         String subServiceTitle = orderDto.getSubServiceTitle();
         LocalDate timeOfOrder = orderDto.getTimeOfOrder();
-        customerService.addOrder(suggestedPrice, customerUsername, subServiceTitle, timeOfOrder, order);
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        customerService.addOrder(suggestedPrice, username, subServiceTitle, timeOfOrder, order);
         return new ResponseEntity<>("ORDER SUCCESSFULLY PLACED", HttpStatus.OK);
     }
 
     @GetMapping("/filter_suggestion_by_specialist_score")
-    public List<Suggestion> findSuggestionsByCustomerAndOrderBySpecialistScore(@RequestParam String customerUsername) {
+    public List<Suggestion> findSuggestionsByCustomerAndOrderBySpecialistScore() {
+        String customerUsername = SecurityContextHolder.getContext().getAuthentication().getName();
         return customerService.findSuggestionByCustomerAndOrderBySpecialistScore(customerUsername);
     }
 
     @GetMapping("/filter_suggestion_by_suggested_price")
-    public List<Suggestion> findSuggestionsByCustomerAndOrderBySuggestedPrice(@RequestParam String customerUsername) {
+    public List<Suggestion> findSuggestionsByCustomerAndOrderBySuggestedPrice() {
+        String customerUsername = SecurityContextHolder.getContext().getAuthentication().getName();
         return customerService.findSuggestionsByCustomerAndOrderBySuggestionPrice(customerUsername);
     }
 
@@ -96,6 +99,13 @@ public class CustomerController {
         return new ResponseEntity<>("FINISHED !", HttpStatus.OK);
     }
 
+    @PutMapping("/increase_credit")
+    public ResponseEntity<String> increaseCredit(@RequestParam Double amount) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        customerService.increaseCredit(amount, username);
+        return new ResponseEntity<>("CREDIT SUCCESSFULLY INCREASED !", HttpStatus.OK);
+    }
+
     @PutMapping("/pay_with_credit")
     public ResponseEntity<String> payWithWalletCredit(@RequestParam(required = false) Integer suggestionId) {
         customerService.payWithWalletCredit(suggestionId);
@@ -104,7 +114,7 @@ public class CustomerController {
 
     @CrossOrigin
     @PostMapping("/pay_with_card")
-    public ResponseEntity<String> payWithCard(@RequestBody PayWithCardDto payWithCardDto) {
+    public ResponseEntity<String> payWithCard() {
         return new ResponseEntity<>("SUCCESSFULLY PAID", HttpStatus.OK);
     }
 
@@ -115,5 +125,17 @@ public class CustomerController {
         customerService.addComment(comment, suggestionId);
         AddCommentResponse addCommentResponse = AddCommentMapper.INSTANCE.dtoToCustomer(comment);
         return new ResponseEntity<>(addCommentResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("/find_all_orders_by_customer")
+    public List<Order> findAllOrdersByCustomer(@RequestParam(required = false) OrderStatus status) {
+        String customerUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        return customerService.findAllOrdersByCustomer(customerUsername, status);
+    }
+
+    @GetMapping("/see_credit")
+    public Double seeCredit() {
+        String customerUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        return customerService.seeCredit(customerUsername);
     }
 }

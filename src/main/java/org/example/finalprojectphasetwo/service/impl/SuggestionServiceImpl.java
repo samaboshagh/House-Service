@@ -1,41 +1,40 @@
 package org.example.finalprojectphasetwo.service.impl;
 
-import org.example.finalprojectphasetwo.dto.request.CreateSuggestionDto;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
 import org.example.finalprojectphasetwo.entity.Order;
 import org.example.finalprojectphasetwo.entity.Suggestion;
 import org.example.finalprojectphasetwo.entity.enumeration.OrderStatus;
-import org.example.finalprojectphasetwo.entity.enumeration.SpecialistStatus;
+import org.example.finalprojectphasetwo.entity.enumeration.Role;
 import org.example.finalprojectphasetwo.entity.users.Customer;
 import org.example.finalprojectphasetwo.entity.users.Specialist;
-import org.example.finalprojectphasetwo.exception.InvalidInputException;
 import org.example.finalprojectphasetwo.exception.NotFoundException;
-import org.example.finalprojectphasetwo.exception.SpecialistQualificationException;
 import org.example.finalprojectphasetwo.repository.SuggestionRepository;
 import org.example.finalprojectphasetwo.service.OrderService;
-import org.example.finalprojectphasetwo.service.SpecialistService;
+import org.example.finalprojectphasetwo.service.SearchUsersService;
 import org.example.finalprojectphasetwo.service.SuggestionService;
-import org.springframework.context.annotation.Lazy;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Transactional(readOnly = true)
 @Service
 public class SuggestionServiceImpl implements SuggestionService {
 
     private final SuggestionRepository suggestionRepository;
-
     private final OrderService orderService;
+    private final SearchUsersService userService;
 
-    private final SpecialistService specialistService;
-
-    public SuggestionServiceImpl(SuggestionRepository suggestionRepository, OrderService orderService, @Lazy SpecialistService specialistService) {
+    public SuggestionServiceImpl(SuggestionRepository suggestionRepository, OrderService orderService, SearchUsersService userService) {
         this.suggestionRepository = suggestionRepository;
         this.orderService = orderService;
-        this.specialistService = specialistService;
+        this.userService = userService;
     }
 
     @Transactional
@@ -51,21 +50,10 @@ public class SuggestionServiceImpl implements SuggestionService {
         );
     }
 
-    public void addSuggestion(CreateSuggestionDto dto) {
-        Specialist specialist = specialistService.findByUsername(dto.getSpecialistUsername());
-        addSuggestionValidation(dto, specialist);
-        Order order = orderService.findById(dto.getOrderId());
-        if (!checkPrice(order, dto))
-            throw new InvalidInputException("SUGGESTED PRICE IS LESS THAN BASE PRICE");
-        Suggestion suggestion = Suggestion
-                .builder()
-                .suggestionCreationDate(LocalDate.now())
-                .suggestedPrice(dto.getSuggestedPrice())
-                .suggestedStartDate(dto.getSuggestedStartDate())
-                .workDuration(dto.getWorkDuration())
-                .order(order)
-                .specialist(specialist)
-                .build();
+    public void addSuggestion(Suggestion suggestion, Order order, Specialist specialist) {
+        suggestion.setSpecialist(specialist);
+        suggestion.setOrder(order);
+        suggestion.setSuggestionCreationDate(LocalDate.now());
         List<Suggestion> suggestions = new ArrayList<>();
         suggestions.add(suggestion);
         suggestionRepository.save(suggestion);
@@ -84,16 +72,29 @@ public class SuggestionServiceImpl implements SuggestionService {
         return suggestionRepository.findSuggestionsByCustomerAndOrderBySpecialistScore(customer);
     }
 
-    private static void addSuggestionValidation(CreateSuggestionDto dto, Specialist specialist) {
-        if (specialist.getSpecialistStatus().equals(SpecialistStatus.NEW) ||
-            specialist.getSpecialistStatus().equals(SpecialistStatus.WARNING))
-            throw new SpecialistQualificationException("SPECIALIST NOT QUALIFIED");
-        if (dto.getOrderId() == null)
-            throw new NotFoundException("ODER ID CANT BE NULL !");
+    @Override
+    public List<Suggestion> historyOfSuggestionForCurrentUser(String username) {
+        if (Objects.equals(username, "admin")) return null;
+        return suggestionRepository.findAll(findSuggestionByUser(username));
     }
 
-    private boolean checkPrice(Order order, CreateSuggestionDto suggestion) {
-        if (order.getSubService().getBasePrice() == null) throw new NotFoundException("SUB SERVICE IS NULL !");
-        return suggestion.getSuggestedPrice() > order.getSubService().getBasePrice();
+    private Specification<Suggestion> findSuggestionByUser(String username) {
+
+        return (root, query, criteriaBuilder) -> {
+
+            Predicate predicate = criteriaBuilder.conjunction();
+
+            if (userService.findByUsername(username).getRole().equals(Role.ROLE_SPECIALIST)) {
+                return criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get("specialist").get("username"), username));
+
+            } else if (userService.findByUsername(username).getRole().equals(Role.ROLE_CUSTOMER)) {
+                Join<Suggestion, Order> subServiceOrderJoin = root.join("order", JoinType.INNER);
+                Join<Order, Customer> customerJoin = subServiceOrderJoin.join("customer", JoinType.INNER);
+                return criteriaBuilder.equal(customerJoin.get("username"), username);
+
+            } else
+                return null;
+        };
     }
+
 }

@@ -2,10 +2,7 @@ package org.example.finalprojectphasetwo.service.impl;
 
 import org.example.finalprojectphasetwo.dto.request.ChangePasswordRequest;
 import org.example.finalprojectphasetwo.dto.request.PayWithCardDto;
-import org.example.finalprojectphasetwo.entity.Comment;
-import org.example.finalprojectphasetwo.entity.Order;
-import org.example.finalprojectphasetwo.entity.Suggestion;
-import org.example.finalprojectphasetwo.entity.Wallet;
+import org.example.finalprojectphasetwo.entity.*;
 import org.example.finalprojectphasetwo.entity.enumeration.OrderStatus;
 import org.example.finalprojectphasetwo.entity.enumeration.Role;
 import org.example.finalprojectphasetwo.entity.services.MainService;
@@ -15,8 +12,11 @@ import org.example.finalprojectphasetwo.entity.users.Specialist;
 import org.example.finalprojectphasetwo.exception.InvalidInputException;
 import org.example.finalprojectphasetwo.exception.NotFoundException;
 import org.example.finalprojectphasetwo.exception.WrongTimeException;
+import org.example.finalprojectphasetwo.repository.ConfirmationTokenRepository;
 import org.example.finalprojectphasetwo.repository.CustomerRepository;
 import org.example.finalprojectphasetwo.service.*;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,9 +38,21 @@ public class CustomerServiceImpl
     private final WalletService walletService;
     private final CommentService commentService;
     private final PaymentService paymentService;
+    private final BCryptPasswordEncoder passwordEncoder;
 
-    public CustomerServiceImpl(CustomerRepository userRepository, SuggestionService suggestionService, SubServiceService subServiceService, MainServiceService mainServiceService, OrderService orderService, SpecialistService specialistService, WalletService walletService, CommentService commentService, PaymentService paymentService) {
-        super(userRepository);
+    public CustomerServiceImpl(CustomerRepository userRepository
+            , SuggestionService suggestionService
+            , SubServiceService subServiceService
+            , MainServiceService mainServiceService
+            , OrderService orderService
+            , SpecialistService specialistService
+            , WalletService walletService
+            , CommentService commentService
+            , PaymentService paymentService
+            , ConfirmationTokenRepository confirmationTokenRepository
+            , EmailService emailService
+            , BCryptPasswordEncoder passwordEncoder) {
+        super(userRepository, emailService, confirmationTokenRepository, passwordEncoder);
         this.suggestionService = suggestionService;
         this.subServiceService = subServiceService;
         this.mainServiceService = mainServiceService;
@@ -49,12 +61,15 @@ public class CustomerServiceImpl
         this.walletService = walletService;
         this.commentService = commentService;
         this.paymentService = paymentService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public Customer findByUsername(String username) {
         return userRepository.findByUsername(username).orElseThrow(
-                () -> new NotFoundException("USER NOT FOUND")
+                () -> new NotFoundException(String.format(
+                        "USER %s NOT FOUND", username
+                ))
         );
     }
 
@@ -70,18 +85,30 @@ public class CustomerServiceImpl
 
     @Transactional
     @Override
-    public void customerSingUp(Customer customer) {
+    public Customer customerSingUp(Customer customer) {
         Wallet wallet = walletService.saveWallet();
         checkUsernameAndEmailForRegistration(customer);
         customer.setActive(true);
+        customer.setPassword(passwordEncoder.encode(customer.getPassword()));
         customer.setWallet(wallet);
-        customer.setRole(Role.CUSTOMER);
-        userRepository.save(customer);
+        customer.setRole(Role.ROLE_CUSTOMER);
+        Customer saved = userRepository.save(customer);
+        sendEmail(customer.getEmailAddress());
+        return saved;
+    }
+
+    @Override
+    public List<Order> findAllOrdersByCustomer(String username, OrderStatus status) {
+        if (status == null) throw new NotFoundException("STATUS IS REQUIRED");
+        Customer customer = findByUsername(username);
+        return orderService.findAllByCustomer(customer, status);
     }
 
     @Override
     public void changePassword(ChangePasswordRequest password) {
-        Customer customer = findByUsername(password.getUsername());
+        Customer customer = findByUsername(
+                SecurityContextHolder.getContext().getAuthentication().getName()
+        );
         changePassword(customer, password);
     }
 
@@ -170,6 +197,24 @@ public class CustomerServiceImpl
         specialist.setStar(comment.getScore());
         specialistService.save(specialist);
         commentService.addCommentToOrder(comment, suggestion);
+    }
+
+    @Override
+    public Double seeCredit(String username) {
+        Customer customer = findByUsername(username);
+        return customer.getWallet().getCreditAmount();
+    }
+
+    @Override
+    public void increaseCredit(Double amount, String username) {
+        Customer customer = findByUsername(username);
+        Wallet wallet = customer.getWallet();
+        wallet.setCreditAmount(
+                wallet.getCreditAmount() + amount
+        );
+        walletService.save(wallet);
+        customer.setWallet(wallet);
+        userRepository.save(customer);
     }
 
     private static boolean changeOrderStatusValidation(Order order, Suggestion suggestion) {
