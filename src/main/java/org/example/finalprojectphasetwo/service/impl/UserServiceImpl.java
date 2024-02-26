@@ -105,8 +105,6 @@ public class UserServiceImpl<T extends User, R extends UserRepository<T>>
 
     @Override
     public void confirmEmail(String confirmationToken) {
-        if (confirmationTokenRepository.existsByConfirmationToken(confirmationToken))
-            throw new DuplicateException("THIS TOKEN IS ALREADY USED");
 
         ConfirmationToken token = confirmationTokenRepository.findByConfirmationToken(confirmationToken);
 

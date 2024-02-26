@@ -49,8 +49,6 @@ public class OrderServiceImpl implements OrderService {
     //  this method will use in controller and list that returns going to use for addSuggestionToOrderBySpecialist() method
     @Override
     public List<Order> findOrderWithWaitingStatusBySpecialist(Specialist specialist) {
-        if (repository.findOrdersBySpecialist(specialist).isEmpty())
-            throw new NotFoundException("THIS SPECIALIST DOESN'T HAVE ANY ORDER ! ");
         return repository.findOrdersBySpecialist(specialist)
                 .stream()
                 .filter(
