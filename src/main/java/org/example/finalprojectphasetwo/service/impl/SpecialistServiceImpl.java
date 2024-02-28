@@ -16,6 +16,7 @@ import org.example.finalprojectphasetwo.exception.WrongTimeException;
 import org.example.finalprojectphasetwo.repository.ConfirmationTokenRepository;
 import org.example.finalprojectphasetwo.repository.SpecialistRepository;
 import org.example.finalprojectphasetwo.service.*;
+import org.example.finalprojectphasetwo.utility.SemaphoreUtil;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -80,6 +81,7 @@ public class SpecialistServiceImpl
     @Transactional
     @Override
     public void specialistSingUp(Specialist specialist, String path) throws IOException {
+        SemaphoreUtil.acquireNewUserSemaphore();
         Wallet wallet = walletService.saveWallet();
         checkUsernameAndEmailForRegistration(specialist);
         specialist.setSpecialistStatus(SpecialistStatus.NEW);
@@ -90,6 +92,7 @@ public class SpecialistServiceImpl
         specialist.setRole(Role.ROLE_SPECIALIST);
         userRepository.save(specialist);
         sendEmail(specialist.getEmailAddress());
+        SemaphoreUtil.releaseNewUserSemaphore();
     }
 
     @Override
@@ -133,12 +136,14 @@ public class SpecialistServiceImpl
     @Override
     public void addSuggestionToOrderBySpecialist(Suggestion suggestion, ZonedDateTime suggestedStatDate,
                                                  String specialistUsername, Double suggestedPrice, Integer orderId) {
+        SemaphoreUtil.acquireNewSuggestionSemaphore();
         Order order = orderService.findById(orderId);
         Specialist specialist = findByUsername(specialistUsername);
         addSuggestionValidation(order, specialist, suggestedStatDate);
         if (!checkPrice(order, suggestion))
             throw new InvalidInputException("SUGGESTED PRICE IS LESS THAN BASE PRICE");
         suggestionService.addSuggestion(suggestion, order, specialist);
+        SemaphoreUtil.releaseNewSuggestionSemaphore();
     }
 
     @Override

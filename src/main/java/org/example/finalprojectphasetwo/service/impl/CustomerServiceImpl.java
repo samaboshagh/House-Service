@@ -15,6 +15,7 @@ import org.example.finalprojectphasetwo.exception.WrongTimeException;
 import org.example.finalprojectphasetwo.repository.ConfirmationTokenRepository;
 import org.example.finalprojectphasetwo.repository.CustomerRepository;
 import org.example.finalprojectphasetwo.service.*;
+import org.example.finalprojectphasetwo.utility.SemaphoreUtil;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -86,6 +87,7 @@ public class CustomerServiceImpl
     @Transactional
     @Override
     public Customer customerSingUp(Customer customer) {
+        SemaphoreUtil.acquireNewUserSemaphore();
         Wallet wallet = walletService.saveWallet();
         checkUsernameAndEmailForRegistration(customer);
         customer.setPassword(passwordEncoder.encode(customer.getPassword()));
@@ -93,6 +95,7 @@ public class CustomerServiceImpl
         customer.setRole(Role.ROLE_CUSTOMER);
         Customer saved = userRepository.save(customer);
         sendEmail(customer.getEmailAddress());
+        SemaphoreUtil.releaseNewUserSemaphore();
         return saved;
     }
 
