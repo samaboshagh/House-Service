@@ -43,11 +43,9 @@ public class User implements UserDetails {
     String password;
 
     @Column(columnDefinition = "boolean default false")
-    boolean isActive;
-
-    @Column(columnDefinition = "boolean default false")
     boolean hasPermission;
 
+    @Column(columnDefinition = "boolean default false")
     boolean isEnabled;
 
     LocalDate creationDate;

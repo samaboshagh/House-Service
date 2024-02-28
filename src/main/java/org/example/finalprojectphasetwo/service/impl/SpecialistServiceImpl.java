@@ -86,7 +86,6 @@ public class SpecialistServiceImpl
         specialist.setProfileImage(setProfileImageToSpecialist(path));
         specialist.setStar(0);
         specialist.setPassword(passwordEncoder.encode(specialist.getPassword()));
-        specialist.setActive(true);
         specialist.setWallet(wallet);
         specialist.setRole(Role.ROLE_SPECIALIST);
         userRepository.save(specialist);
@@ -147,7 +146,7 @@ public class SpecialistServiceImpl
     public void demotionOfTheSpecialist(Specialist specialist) {
         if (userRepository.findByUsername(specialist.getUsername()).isPresent() && specialist.getStar() < 0) {
             specialist.setSpecialistStatus(SpecialistStatus.WARNING);
-            specialist.setActive(false);
+            specialist.setEnabled(false);
             userRepository.save(specialist);
         }
     }

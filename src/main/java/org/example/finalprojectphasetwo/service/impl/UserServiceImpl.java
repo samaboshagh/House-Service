@@ -88,7 +88,7 @@ public class UserServiceImpl<T extends User, R extends UserRepository<T>>
     public void sendEmail(String emailAddress) {
         T user = findUserByEmailAddress(emailAddress);
 
-        ConfirmationToken confirmationToken = new ConfirmationToken(user);
+        ConfirmationToken confirmationToken = new ConfirmationToken(user,true);
 
         confirmationTokenRepository.save(confirmationToken);
 
@@ -108,12 +108,22 @@ public class UserServiceImpl<T extends User, R extends UserRepository<T>>
 
         ConfirmationToken token = confirmationTokenRepository.findByConfirmationToken(confirmationToken);
 
-        if (token == null)
-            throw new ConfirmEmailException("EMAIL NOT CONFIRMED");
+        confirmEmailValidation(token);
+
+        token.setActive(false);
+        confirmationTokenRepository.save(token);
 
         T user = findUserByEmailAddress(token.getUser().getEmailAddress());
         user.setEnabled(true);
         save(user);
+    }
+
+    private static void confirmEmailValidation(ConfirmationToken token) {
+        if (token == null)
+            throw new ConfirmEmailException("EMAIL NOT CONFIRMED");
+
+        if (!token.isActive())
+            throw new ConfirmEmailException("THIS TOKEN IS ALREADY USED");
     }
 
     private static <T extends User> void validPasswordCheck(T user, ChangePasswordRequest password) {

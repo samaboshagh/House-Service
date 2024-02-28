@@ -73,7 +73,7 @@ public class AdminServiceImpl
                             .username("admin")
                             .password(passwordEncoder.encode("admin123"))
                             .hasPermission(true)
-                            .isActive(true)
+                            .isEnabled(true)
                             .role(Role.ROLE_ADMIN)
                             .build()
             );
@@ -198,6 +198,6 @@ public class AdminServiceImpl
     }
 
     private boolean addSpecialistToSubServiceByAdminValidation(Specialist specialist) {
-        return specialist.getSpecialistStatus().equals(SpecialistStatus.ACCEPTED) && specialist.isActive();
+        return specialist.getSpecialistStatus().equals(SpecialistStatus.ACCEPTED) && specialist.isEnabled();
     }
 }

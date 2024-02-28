@@ -88,7 +88,6 @@ public class CustomerServiceImpl
     public Customer customerSingUp(Customer customer) {
         Wallet wallet = walletService.saveWallet();
         checkUsernameAndEmailForRegistration(customer);
-        customer.setActive(true);
         customer.setPassword(passwordEncoder.encode(customer.getPassword()));
         customer.setWallet(wallet);
         customer.setRole(Role.ROLE_CUSTOMER);

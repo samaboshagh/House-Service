@@ -25,11 +25,14 @@ public class ConfirmationToken {
     @Temporal(TemporalType.TIMESTAMP)
     Date createdDate;
 
+    boolean isActive;
+
     @OneToOne
     User user;
 
-    public ConfirmationToken(User user) {
+    public ConfirmationToken(User user,boolean isActive) {
         this.user = user;
+        this.isActive = isActive;
         createdDate = new Date();
         confirmationToken = UUID.randomUUID().toString();
     }
