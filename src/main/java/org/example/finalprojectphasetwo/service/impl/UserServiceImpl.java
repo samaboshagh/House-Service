@@ -88,7 +88,7 @@ public class UserServiceImpl<T extends User, R extends UserRepository<T>>
     public void sendEmail(String emailAddress) {
         T user = findUserByEmailAddress(emailAddress);
 
-        ConfirmationToken confirmationToken = new ConfirmationToken(user,true);
+        ConfirmationToken confirmationToken = new ConfirmationToken(user, true);
 
         confirmationTokenRepository.save(confirmationToken);
 
