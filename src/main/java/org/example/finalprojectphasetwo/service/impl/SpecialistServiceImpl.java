@@ -136,14 +136,12 @@ public class SpecialistServiceImpl
     @Override
     public void addSuggestionToOrderBySpecialist(Suggestion suggestion, ZonedDateTime suggestedStatDate,
                                                  String specialistUsername, Double suggestedPrice, Integer orderId) {
-        SemaphoreUtil.acquireNewSuggestionSemaphore();
         Order order = orderService.findById(orderId);
         Specialist specialist = findByUsername(specialistUsername);
         addSuggestionValidation(order, specialist, suggestedStatDate);
         if (!checkPrice(order, suggestion))
             throw new InvalidInputException("SUGGESTED PRICE IS LESS THAN BASE PRICE");
         suggestionService.addSuggestion(suggestion, order, specialist);
-        SemaphoreUtil.releaseNewSuggestionSemaphore();
     }
 
     @Override
