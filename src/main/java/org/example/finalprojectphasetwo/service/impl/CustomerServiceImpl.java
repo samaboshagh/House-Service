@@ -26,6 +26,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 @Transactional
+@SuppressWarnings("unused")
 @Service
 public class CustomerServiceImpl
         extends UserServiceImpl<Customer, CustomerRepository>
@@ -86,7 +87,7 @@ public class CustomerServiceImpl
 
     @Transactional
     @Override
-    public Customer customerSingUp(Customer customer) {
+    public void customerSingUp(Customer customer) {
         SemaphoreUtil.acquireNewUserSemaphore();
         Wallet wallet = walletService.saveWallet();
         checkUsernameAndEmailForRegistration(customer);
@@ -96,7 +97,6 @@ public class CustomerServiceImpl
         Customer saved = userRepository.save(customer);
         sendEmail(customer.getEmailAddress());
         SemaphoreUtil.releaseNewUserSemaphore();
-        return saved;
     }
 
     @Override
@@ -115,11 +115,12 @@ public class CustomerServiceImpl
     }
 
     @Override
-    public void addOrder(Double suggestedPrice, String customerUsername, String subServiceTitle, LocalDate timeOfOrder, Order order) {
-        timeValidation(timeOfOrder);
-        Customer customer = findByUsername(customerUsername);
+    public void addOrder(Order order, String subServiceTitle) {
+        timeValidation(order);
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Customer customer = findByUsername(username);
         SubService subService = subServiceService.findBySubServiceTitle(subServiceTitle);
-        if (!checkPrice(subService, suggestedPrice))
+        if (!checkPrice(subService, order))
             throw new InvalidInputException("BASE PRICE IS MORE THAN SUGGESTED PRICE ! ");
         orderService.addOrder(subService, customer, order);
     }
@@ -250,16 +251,16 @@ public class CustomerServiceImpl
             throw new NotFoundException("CUSTOMER USERNAME CAN NOT BE NULL");
     }
 
-    private static void timeValidation(LocalDate timeOfOrder) {
-        if (timeOfOrder == null)
+    private static void timeValidation(Order order) {
+        if (order.getTimeOfOrder() == null)
             throw new InvalidInputException("TIME OF ORDER CANNOT BE NULL");
-        if (timeOfOrder.isBefore(LocalDate.now()))
+        if (order.getTimeOfOrder().isBefore(LocalDate.now()))
             throw new WrongTimeException("INVALID DATE !");
     }
 
-    private boolean checkPrice(SubService subService, Double suggestedPrice) {
-        if (suggestedPrice == null) throw new NotFoundException("SUGGESTED PRICE IS NULL !");
-        return subService.getBasePrice() < suggestedPrice;
+    private boolean checkPrice(SubService subService, Order order) {
+        if (order == null) throw new NotFoundException("SUGGESTED PRICE IS NULL !");
+        return subService.getBasePrice() < order.getSuggestedPrice();
     }
 
 }

@@ -134,11 +134,11 @@ public class SpecialistServiceImpl
 
     @Transactional
     @Override
-    public void addSuggestionToOrderBySpecialist(Suggestion suggestion, ZonedDateTime suggestedStatDate,
-                                                 String specialistUsername, Double suggestedPrice, Integer orderId) {
+    public void addSuggestionToOrderBySpecialist(Suggestion suggestion, Integer orderId) {
         Order order = orderService.findById(orderId);
-        Specialist specialist = findByUsername(specialistUsername);
-        addSuggestionValidation(order, specialist, suggestedStatDate);
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Specialist specialist = findByUsername(username);
+        addSuggestionValidation(order, specialist, suggestion.getSuggestedStartDate());
         if (!checkPrice(order, suggestion))
             throw new InvalidInputException("SUGGESTED PRICE IS LESS THAN BASE PRICE");
         suggestionService.addSuggestion(suggestion, order, specialist);

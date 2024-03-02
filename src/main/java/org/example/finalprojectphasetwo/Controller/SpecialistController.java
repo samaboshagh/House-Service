@@ -23,7 +23,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.time.ZonedDateTime;
 import java.util.List;
 
 @RestController
@@ -34,7 +33,7 @@ public class SpecialistController {
 
     private final SpecialistService specialistService;
 
-    @PostMapping("/sing_up")
+    @PostMapping("/sing-up")
     public ResponseEntity<CreateSpecialistResponse> specialistSingUp(@RequestBody @Valid SpecialistsSingUpDto dto) throws IOException {
         Specialist specialist = SpecialistMapper.INSTANCE.convertToDto(dto);
         specialistService.specialistSingUp(specialist, dto.getPathName());
@@ -42,30 +41,27 @@ public class SpecialistController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @PutMapping("/change_password")
+    @PutMapping("/change-password")
     public ResponseEntity<String> changePassword(@RequestBody @Valid ChangePasswordRequest password) {
         specialistService.changePassword(password);
         return new ResponseEntity<>("PASSWORD CHANGED SUCCESSFULLY", HttpStatus.OK);
     }
 
-    @GetMapping("/show_all_orders")
+    @GetMapping("/show-all-orders")
     public List<Order> findAllOrders() {
         String specialistUsername = SecurityContextHolder.getContext().getAuthentication().getName();
         return specialistService.findAllOrders(specialistUsername);
     }
 
-    @PostMapping("/add_suggestion")
+    @PostMapping("/add-suggestion")
     public ResponseEntity<String> addSuggestionToOrder(@RequestBody @Valid CreateSuggestionDto dto) {
         Suggestion suggestion = AddSuggestionMapper.INSTANCE.convertToDto(dto);
         Integer orderId = dto.getOrderId();
-        String specialistUsername = dto.getSpecialistUsername();
-        ZonedDateTime suggestedStartDate = dto.getSuggestedStartDate();
-        Double suggestedPrice = dto.getSuggestedPrice();
-        specialistService.addSuggestionToOrderBySpecialist(suggestion, suggestedStartDate, specialistUsername, suggestedPrice, orderId);
+        specialistService.addSuggestionToOrderBySpecialist(suggestion, orderId);
         return new ResponseEntity<>("SUGGESTION ADDED SUCCESSFULLY", HttpStatus.CREATED);
     }
 
-    @GetMapping("/show_comments")
+    @GetMapping("/show-comments")
     public ResponseEntity<List<AddCommentResponse>> findAllBySpecialist() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         List<Comment> comments = specialistService.findAllBySpecialist(username);
@@ -73,13 +69,13 @@ public class SpecialistController {
         return new ResponseEntity<>(responses, HttpStatus.CREATED);
     }
 
-    @GetMapping("/find_all_orders_by_specialist")
+    @GetMapping("/find-all-orders-by-specialist")
     public List<Order> findAllOrdersBySpecialist(@RequestParam(required = false) OrderStatus status) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return specialistService.findAllOrdersBySpecialist(username, status);
     }
 
-    @GetMapping("/see_credit")
+    @GetMapping("/see-credit")
     public Double seeCredit() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return specialistService.seeCredit(username);

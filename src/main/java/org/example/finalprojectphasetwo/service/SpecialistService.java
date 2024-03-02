@@ -10,10 +10,9 @@ import org.example.finalprojectphasetwo.entity.users.Specialist;
 
 
 import java.io.IOException;
-import java.time.ZonedDateTime;
 import java.util.List;
 
-
+@SuppressWarnings("unused")
 public interface SpecialistService {
 
     Specialist save(Specialist specialist);
@@ -30,7 +29,7 @@ public interface SpecialistService {
 
     List<Order> findAllOrders(String username);
 
-    void addSuggestionToOrderBySpecialist(Suggestion suggestion, ZonedDateTime suggestedStatDate, String specialistUsername, Double suggestedPrice, Integer orderId);
+    void addSuggestionToOrderBySpecialist(Suggestion suggestion, Integer orderId);
 
     void demotionOfTheSpecialist(Specialist specialist);
 

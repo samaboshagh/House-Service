@@ -28,19 +28,19 @@ public class AdminController {
 
     private final AdminService adminService;
 
-    @PostMapping("/add_main_service")
+    @PostMapping("/add-main-service")
     public ResponseEntity<MainServiceDto> addService(@RequestBody @Valid MainServiceDto mainServiceDto) {
         MainService mainService = MainServiceMapper.INSTANCE.convertToDto(mainServiceDto);
         adminService.saveServiceByAdmin(mainService);
         return new ResponseEntity<>(mainServiceDto, HttpStatus.CREATED);
     }
 
-    @GetMapping("/show_all_MainServices")
+    @GetMapping("/show-all-MainServices")
     public List<MainService> showAll() {
         return adminService.showAllMainServices();
     }
 
-    @PostMapping("/add_sub_service")
+    @PostMapping("/add-sub-service")
     public ResponseEntity<SubServiceDto> addSubService(@RequestBody @Valid SubServiceDto subServiceDto) {
         String mainServiceName = subServiceDto.getMainServiceName();
         SubService subService = SubServiceMapper.INSTANCE.convertToDto(subServiceDto);
@@ -48,42 +48,42 @@ public class AdminController {
         return new ResponseEntity<>(subServiceDto, HttpStatus.CREATED);
     }
 
-    @GetMapping("/show_all_subServices")
+    @GetMapping("/show-all-subServices")
     public List<SubService> showAllSubServices() {
         return adminService.showAllSubServices();
     }
 
 
-    @GetMapping("/show_all_specialists")
+    @GetMapping("/show-all-specialists")
     public List<Specialist> findAllSpecialist() {
         return adminService.findAllSpecialist();
     }
 
 
-    @PutMapping("/add_specialist_to_sub_service")
+    @PutMapping("/add-specialist-to-sub-service")
     public ResponseEntity<AddAndDeleteSpecialistFromSubServiceRequest> addSpecialistToSubService(@RequestBody @Valid AddAndDeleteSpecialistFromSubServiceRequest request) {
         adminService.addSpecialistToSubServiceByAdmin(request);
         return new ResponseEntity<>(request, HttpStatus.OK);
     }
 
-    @DeleteMapping("/delete_specialist_to_sub_service")
+    @DeleteMapping("/delete-specialist-to-sub-service")
     public ResponseEntity<String> deleteSpecialistFromSubService(@RequestBody @Valid AddAndDeleteSpecialistFromSubServiceRequest request) {
         adminService.deleteSpecialistFromSubServiceByAdmin(request);
         return new ResponseEntity<>("SPECIALIST SUCCESSFULLY DELETED ", HttpStatus.NO_CONTENT);
     }
 
-    @GetMapping("/show_specialist_by_status")
+    @GetMapping("/show-specialist-by-status")
     public List<Specialist> findSpecialistBySpecialistStatus(@RequestParam SpecialistStatus status) {
         return adminService.findSpecialistBySpecialistStatus(status);
     }
 
-    @PutMapping("update_specialist_status")
+    @PutMapping("update-specialist-status")
     public ResponseEntity<String > setAcceptStatusForSpecialist(@RequestParam String username) {
         adminService.setAcceptStatusForSpecialistByAdmin(username);
         return new ResponseEntity<>("SPECIALIST STATUS SUCCESSFULLY CHANGED ",HttpStatus.OK);
     }
 
-    @PutMapping("edit_description_and_price")
+    @PutMapping("edit-description-and-price")
     public ResponseEntity<EditPriceAndDescriptionRequest> editDescriptionAndPrice(@RequestBody @Valid EditPriceAndDescriptionRequest request) {
         adminService.editDescriptionAndPrice(request);
         return new ResponseEntity<>(request, HttpStatus.OK);
@@ -94,22 +94,22 @@ public class AdminController {
         return adminService.searchUsersByAdmin(search);
     }
 
-    @GetMapping("/get_history_of_sub_services_for_user")
+    @GetMapping("/get-history-of-sub-services-for-user")
     public List<SubService> getHistoryOfSubServicesForUser(@RequestParam String username) {
         return adminService.getHistoryOfSubServicesForUser(username);
     }
 
-    @GetMapping("/get_history_of_suggestion_for_user")
+    @GetMapping("/get-history-of-suggestion-for-user")
     public List<Suggestion> getHistoryOfSuggestionForUser(@RequestParam String username){
         return adminService.getHistoryOfSuggestionForUser(username);
     }
 
-    @GetMapping("/get_history_of_orders_for_user")
+    @GetMapping("/get-history-of-orders-for-user")
     public List<Order> getHistoryOfOrdersForUser(@RequestBody OrderHistoryDto dto) {
         return adminService.getHistoryOfOrdersForUser(dto);
     }
 
-    @GetMapping("/reporting_from_users")
+    @GetMapping("/reporting-from-users")
     public ReportDto reportingFromUsers(@RequestParam String username) {
         return adminService.reportingFromUsers(username);
     }

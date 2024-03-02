@@ -9,14 +9,13 @@ import org.example.finalprojectphasetwo.entity.enumeration.OrderStatus;
 import org.example.finalprojectphasetwo.entity.services.MainService;
 import org.example.finalprojectphasetwo.entity.services.SubService;
 import org.example.finalprojectphasetwo.entity.users.Customer;
-import org.springframework.http.ResponseEntity;
 
-import java.time.LocalDate;
 import java.util.List;
 
+@SuppressWarnings("unused")
 public interface CustomerService {
 
-    Customer customerSingUp(Customer customer);
+    void customerSingUp(Customer customer);
 
     void changePassword(ChangePasswordRequest password);
 
@@ -26,7 +25,7 @@ public interface CustomerService {
 
     List<SubService> showAllSubServices();
 
-    void addOrder(Double suggestedPrice, String customerUsername, String subServiceTitle, LocalDate timeOfOrder, Order order);
+    void addOrder(Order order, String subServiceTitle);
 
     List<Suggestion> findSuggestionByCustomerAndOrderBySpecialistScore(String customerUsername);
 
